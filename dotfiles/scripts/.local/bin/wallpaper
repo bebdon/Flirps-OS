@@ -2,7 +2,7 @@
 # Set wallpapers with awww and recolor everything with matugen.
 # Usage: wallpaper set <file> | random | next | rotate | pick | restore
 #   rotate = what the rotation timer runs (uses ROTATE_ORDER / ROTATE_POOL from ~/.config/wallpaper.conf)
-#   pick = Quickshell picker, rofi = old picker
+#   pick = Quickshell wallpaper picker
 
 DIR="$HOME/Pictures/Wallpapers"
 STATE="$HOME/.cache/wallpaper/current"
@@ -53,11 +53,6 @@ case "$1" in
     random)  cur=$(cat "$STATE" 2>/dev/null)
              apply "$(list | grep -vxF "$cur" | shuf -n1)" ;;
     pick)    exec ~/.local/bin/qs-panel wallpapers ;;
-    rofi)    ~/.local/bin/wallpaper-thumbs
-             name=$(list | xargs -d '\n' -n1 basename | sort | while read -r n; do
-                        printf '%s\0icon\x1f%s\n' "$n" "$HOME/.cache/wallpaper/thumbs/$n.jpg"
-                    done | rofi -dmenu -i -p "󰍉" -theme ~/.config/rofi/wallpaper.rasi)
-             [ -n "$name" ] && apply "$DIR/$name" ;;
     restore) if [ -f "$(cat "$STATE" 2>/dev/null)" ]; then apply "$(cat "$STATE")"; else apply "$(list | shuf -n1)"; fi ;;
     *)       echo "Usage: wallpaper set <file> | random | next | rotate | pick | restore"; exit 1 ;;
 esac

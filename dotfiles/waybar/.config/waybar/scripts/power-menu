@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# Replaced by the Quickshell power menu.
-exec ~/.local/bin/qs-panel power

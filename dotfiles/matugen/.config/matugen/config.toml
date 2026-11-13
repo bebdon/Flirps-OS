@@ -35,17 +35,9 @@ post_hook = "swaync-client -rs >/dev/null 2>&1 || true"
 input_path = "~/.config/matugen/templates/colors.css"
 output_path = "~/.config/nwg-dock-hyprland/colors.css"
 
-[templates.fuzzel]
-input_path = "~/.config/matugen/templates/fuzzel.ini"
-output_path = "~/.config/fuzzel/colors.ini"
-
 [templates.hypr]
 input_path = "~/.config/matugen/templates/hypr-colors.conf"
 output_path = "~/.config/hypr/colors.conf"
-
-[templates.rofi]
-input_path = "~/.config/matugen/templates/rofi.rasi"
-output_path = "~/.config/rofi/colors.rasi"
 
 [templates.quickshell]
 input_path = "~/.config/matugen/templates/quickshell.json"

@@ -122,7 +122,7 @@ Page {
     OptionRow {
         icon: 0xF050E
         title: "Mode"
-        description: "Applies to bar, dock, notifications, GTK, Qt, kitty, rofi"
+        description: "Applies to bar, dock, notifications, GTK, Qt, kitty"
         Dropdown {
             value: Backend.get("wallpaper", "mode", "dark")
             options: [{ label: "Dark", value: "dark" }, { label: "Light", value: "light" }]

@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-# Replaced by the Quickshell settings app.
-[ "$1" = power ] && exec ~/.local/bin/settings display
-exec ~/.local/bin/settings

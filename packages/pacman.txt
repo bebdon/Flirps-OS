@@ -22,8 +22,6 @@ imagemagick
 
 # Apps
 kitty
-fuzzel
-rofi
 thunar
 thunar-archive-plugin
 tumbler

@@ -32,7 +32,7 @@ Existing configs that would be overwritten are moved to `~/.flirps-backup/<date>
 | Quickshell | Panels: launcher, dashboard, quick settings, media, clipboard, notes, calculator, wallpapers, power menu |
 | Waybar, swaync, swayosd | Bar, notifications, volume and brightness popups |
 | nwg-dock | Dock |
-| kitty, fuzzel, rofi, Thunar | Terminal, launchers, file manager |
+| kitty, Thunar | Terminal, file manager |
 | hyprlock, hypridle, SDDM | Lock screen, idle handling, matching login screen |
 
 ## Layout
