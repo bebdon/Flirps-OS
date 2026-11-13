@@ -7,7 +7,7 @@ import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import Quickshell.Services.Pipewire
 
-// Quick settings (click waybar's wifi / bluetooth / volume / battery icons).
+// Quick settings (click the bar's wifi / bluetooth / volume / battery icons).
 BarPopup {
     id: root
     ns: "qs-quicksettings"

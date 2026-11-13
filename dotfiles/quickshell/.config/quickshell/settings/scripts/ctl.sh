@@ -7,10 +7,10 @@ set -u
 HYPR=~/.config/hypr/config/settings.lua
 MON=~/.config/hypr/config/monitors.lua
 AUTO=~/.config/hypr/config/autostart.lua
-BAR=~/.config/waybar/config.jsonc
+BAR=~/.config/quickshell/panels/bar.json
 NOTIF=~/.config/quickshell/panels/notifications.json
 IDLE=~/.config/hypr/hypridle.conf
-NIGHT=~/.config/waybar/scripts/nightlight
+NIGHT=~/.local/bin/nightlight
 WALLCONF=~/.config/wallpaper.conf
 
 # ---- helpers -------------------------------------------------------------
@@ -111,9 +111,7 @@ state() {
       --arg power "$(powerprofilesctl get 2>/dev/null)" \
       --slurpfile notif "$NOTIF" \
       --argjson dnd "$dnd" \
-      --arg bar_pos "$(head -12 "$BAR" | grep -m1 -oP '"position": "\K\w+')" \
-      --argjson bar_height "$(head -12 "$BAR" | grep -m1 -oP '"height": \K[0-9]+')" \
-      --argjson bar_margin "$(head -12 "$BAR" | grep -m1 -oP '"margin-left": \K[0-9]+')" \
+      --slurpfile bar "$BAR" \
       --arg dock_mode "$dock_mode" --argjson dock_size "${dock_size:-44}" --arg dock_pos "${dock_pos:-bottom}" \
       --argjson idle_dim "$(idle_get dim)" --argjson idle_lock "$(idle_get lock)" \
       --argjson idle_dpms "$(idle_get dpms)" --argjson idle_suspend "$(idle_get suspend)" \
@@ -126,7 +124,7 @@ state() {
                 blur: $blur, blur_size: $blur_size, blur_passes: $blur_passes, shadow: $shadow,
                 natural_scroll: $natural_scroll, accel: $accel, anim: $anim },
         display: { scale: $scale, nightlight: $nl, nightlight_temp: $nl_temp, power: $power },
-        bar: { position: $bar_pos, height: $bar_height, margin: $bar_margin },
+        bar: { position: $bar[0].position, height: $bar[0].height, margin: $bar[0].margin },
         dock: { mode: $dock_mode, size: $dock_size, position: $dock_pos },
         notif: { x: $notif[0].x, y: $notif[0].y, timeout: $notif[0].timeout,
                  width: $notif[0].width, sound: $notif[0].sound, dnd: $dnd },
@@ -170,13 +168,11 @@ set_display() {
 set_bar() {
     local k="$1" v="$2"
     case "$k" in
-        position)
-            V="$v" perl -pi -e 'if ($. <= 12) { s/("position": )"\w+"/$1"$ENV{V}"/;
-                if ($ENV{V} eq "bottom") { s/"margin-top"/"margin-bottom"/ } else { s/"margin-bottom"/"margin-top"/ } }' "$BAR" ;;
-        height) V="$v" perl -pi -e 'if ($. <= 12) { s/("height": )\d+/$1$ENV{V}/ }' "$BAR" ;;
-        margin) V="$v" perl -pi -e 'if ($. <= 12) { s/("margin-(top|bottom|left|right)": )\d+/$1$ENV{V}/ }' "$BAR" ;;
+        position) json_set "$BAR" --arg v "$v" '.position = $v' ;;
+        height)   json_set "$BAR" --argjson v "$v" '.height = $v' ;;
+        margin)   json_set "$BAR" --argjson v "$v" '.margin = $v' ;;
     esac
-    pkill -SIGUSR2 -x waybar
+    # quickshell watches bar.json, nothing to reload
 }
 
 set_dock() {

@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 
-// Base for popups that drop down from waybar. Set `align` to "left", "center" or "right".
+// Base for popups that drop down from the bar. Set `align` to "left", "center" or "right".
 // Click outside or press Esc to close. Slide + fade in/out.
 PanelWindow {
     id: root
@@ -10,7 +10,7 @@ PanelWindow {
     property string align: "right"
     property real cardWidth: 420
     property real cardHeight: card.childrenRect.height + 24
-    property real barOffset: 48           // waybar height (36) + margin (6) + gap
+    property real barOffset: BarCfg.reserved + 6   // below the bar (height + margin) + gap
     property bool shown: false
     property string ns: "qs-popup"
     signal opened()

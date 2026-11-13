@@ -49,7 +49,7 @@ hl.bind(mainMod .. " + F", hl.dsp.exec_cmd("waterfox"))
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd("thunar"))
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 
-hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("pkill -SIGUSR2 -x waybar; qs kill -c panels; setsid -f qs -c panels"))
+hl.bind(mainMod .. " + R", hl.dsp.exec_cmd("qs kill -c panels; setsid -f qs -c panels"))
 hl.bind(mainMod .. " + C", hl.dsp.exec_cmd("~/.local/bin/qs-panel clipboard"))
 hl.bind(mainMod .. " + D", hl.dsp.exec_cmd("~/.local/bin/qs-panel launcher"))
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("~/.local/bin/qs-panel notifcenter"))
@@ -59,7 +59,7 @@ hl.bind(mainMod .. " + S", hl.dsp.exec_cmd("~/.local/bin/qs-panel notifcenter"))
 hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("~/.local/bin/qs-panel quicksettings wifi"))
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("~/.local/bin/qs-panel quicksettings audio"))
 hl.bind(mainMod .. " + H", hl.dsp.exec_cmd("~/.local/bin/settings"))
-hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("pkill -SIGUSR1 -x waybar"))
+hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("qs -c panels ipc call bar toggle"))
 
 for i = 1, 10 do
   local key = tostring(i % 10)

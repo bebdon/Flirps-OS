@@ -25,7 +25,7 @@ ShellRoot {
             ] },
             { id: "display", label: "Display", icon: 0xF0379, keys: "scale night light hyprsunset power profile" },
             { id: "input", label: "Input", icon: 0xF037D, keys: "mouse touchpad scroll acceleration" },
-            { id: "bar", label: "Bar", icon: 0xF056E, keys: "waybar height position margin" },
+            { id: "bar", label: "Bar", icon: 0xF056E, keys: "top bar height position margin" },
             { id: "dock", label: "Dock", icon: 0xF003B, keys: "nwg autohide icon size" },
             { id: "notifications", label: "Notifications", icon: 0xF009A, keys: "popups dnd do not disturb sound timeout" },
             { id: "idle", label: "Idle", icon: 0xF04B2, keys: "hypridle lock suspend dim timeout caffeine" },

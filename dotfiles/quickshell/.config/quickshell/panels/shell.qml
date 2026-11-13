@@ -25,6 +25,7 @@ ShellRoot {
     TimerTool { id: timerTool }
     NotesTool { id: notesTool }
     Osd { id: osd }
+    Bar { }
     NotifPopups { }
     NotifCenter { id: notifCenter }
     Rotator { id: rotator }
@@ -95,5 +96,10 @@ ShellRoot {
         target: "notifcenter"
         function toggle(): void { const v = notifCenter.shown; shellRoot.closeAll(); if (!v) notifCenter.open(); }
         function close(): void { notifCenter.close(); }
+    }
+    IpcHandler {
+        target: "bar"
+        function toggle(): void { BarCfg.hidden = !BarCfg.hidden; }
+        function refresh(): void { BarCfg.refreshNightlight(); }
     }
 }

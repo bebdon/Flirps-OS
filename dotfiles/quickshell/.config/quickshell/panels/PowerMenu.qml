@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 
-// Power menu (waybar power button). ←/→ to move, Enter to pick, or press the letter shown.
+// Power menu (bar power button). ←/→ to move, Enter to pick, or press the letter shown.
 PanelWindow {
     id: root
     visible: false

@@ -1,4 +1,4 @@
-for _, ns in ipairs({ "waybar", "launcher", "nwg-dock", "swayosd", "qs-launcher", "qs-power", "qs-clipboard", "qs-wallpapers" }) do
+for _, ns in ipairs({ "qs-bar", "launcher", "nwg-dock", "swayosd", "qs-launcher", "qs-power", "qs-clipboard", "qs-wallpapers" }) do
   hl.layer_rule({ match = { namespace = "^" .. ns .. "$" }, blur = true, ignore_alpha = 0.3 })
 end
 

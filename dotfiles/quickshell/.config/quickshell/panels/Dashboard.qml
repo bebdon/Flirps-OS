@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 
-// Calendar + clock + weather (click the clock in waybar).
+// Calendar + clock + weather (click the clock in the bar).
 BarPopup {
     id: root
     ns: "qs-dashboard"

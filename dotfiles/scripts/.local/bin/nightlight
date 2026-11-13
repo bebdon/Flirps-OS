@@ -12,7 +12,7 @@ case "$1" in
             disown
         fi
         sleep 0.2
-        pkill -RTMIN+8 -x waybar
+        qs -c panels ipc call bar refresh >/dev/null 2>&1
         ;;
     status|*)
         if pgrep -x hyprsunset >/dev/null; then

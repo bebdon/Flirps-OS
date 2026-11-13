@@ -3,7 +3,7 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Services.Mpris
 
-// Media player popup (click the song in waybar).
+// Media player popup (click the song in the bar).
 BarPopup {
     id: root
     ns: "qs-media"
