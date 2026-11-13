@@ -6,8 +6,11 @@ Item {
     property int icon
     property real value: 0          // 0..1
     property bool muted: false
+    property bool expandable: false     // round chevron button on the right
+    property bool expanded: false
     signal moved(real value)
     signal iconClicked()
+    signal expandClicked()
 
     height: 48
 
@@ -22,7 +25,8 @@ Item {
     Rectangle {
         id: track
         anchors.left: btn.right; anchors.leftMargin: 10
-        anchors.right: parent.right
+        anchors.right: chev.visible ? chev.left : parent.right
+        anchors.rightMargin: chev.visible ? 10 : 0
         anchors.verticalCenter: parent.verticalCenter
         height: 40; radius: 20
         color: Theme.surfaceHigh
@@ -51,5 +55,20 @@ Item {
             onPositionChanged: m => { if (pressed) upd(m.x); }
             onWheel: w => root.moved(Math.max(0, Math.min(1, root.value + (w.angleDelta.y > 0 ? 0.05 : -0.05))))
         }
+    }
+
+    Rectangle {
+        id: chev
+        visible: root.expandable
+        anchors.right: parent.right
+        width: 48; height: 48; radius: 24
+        color: root.expanded ? Theme.secondaryContainer : chm.containsMouse ? Theme.surfaceHighest : Theme.surfaceHigh
+        Icon {
+            anchors.centerIn: parent; code: 0xF0142; size: 20
+            color: root.expanded ? Theme.fgSecondaryContainer : Theme.text
+            rotation: root.expanded ? 90 : 0
+            Behavior on rotation { NumberAnimation { duration: 160 } }
+        }
+        MouseArea { id: chm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: root.expandClicked() }
     }
 }

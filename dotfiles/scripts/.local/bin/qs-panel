@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
-# Toggle a Quickshell overlay: qs-panel launcher|power|clipboard|wallpapers
+# Toggle a Quickshell overlay: qs-panel launcher|power|clipboard|wallpapers|quicksettings ...
+#   qs-panel quicksettings wifi|bt|audio   opens Quick Settings with that list expanded
 # Starts the resident "panels" process if it isn't running.
 t="${1:-launcher}"
-qs -c panels ipc call "$t" toggle >/dev/null 2>&1 && exit
+expand="${2:-}"
+open() {
+    qs -c panels ipc call "$t" toggle >/dev/null 2>&1 || return 1
+    if [ -n "$expand" ]; then qs -c panels ipc call "$t" expand "$expand" >/dev/null 2>&1; fi
+    return 0
+}
+open && exit
 setsid -f qs -c panels >/dev/null 2>&1
 for _ in $(seq 30); do
     sleep 0.1
-    qs -c panels ipc call "$t" toggle >/dev/null 2>&1 && exit
+    open && exit
 done

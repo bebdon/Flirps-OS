@@ -26,7 +26,6 @@ thunar-archive-plugin
 tumbler
 gvfs
 fastfetch
-pavucontrol
 
 # Clipboard, screenshots, recording
 cliphist
@@ -47,7 +46,6 @@ networkmanager
 network-manager-applet
 bluez
 bluez-utils
-blueman
 power-profiles-daemon
 brightnessctl
 playerctl

@@ -5,6 +5,7 @@ import Quickshell.Io
 import Quickshell.Networking
 import Quickshell.Bluetooth
 import Quickshell.Services.UPower
+import Quickshell.Services.Pipewire
 
 // Quick settings (click waybar's wifi / bluetooth / volume / battery icons).
 BarPopup {
@@ -15,7 +16,7 @@ BarPopup {
     signal openPower()
     signal openMedia()
 
-    property string expandedList: ""     // "", "wifi", "bt"
+    property string expandedList: ""     // "", "wifi", "bt", "audio"
     property string uptime: ""
     property string pwTarget: ""          // network awaiting a password
     property string pwError: ""
@@ -254,7 +255,7 @@ BarPopup {
                 Rectangle {
                     width: parent.width; height: 40; radius: 20
                     color: netSettingsMa.containsMouse ? Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.06) : "transparent"
-                    SText { anchors.centerIn: parent; text: "Network settings…"; color: Theme.primary; font.pixelSize: 12 }
+                    SText { anchors.centerIn: parent; text: "Advanced network settings…"; color: Theme.primary; font.pixelSize: 12 }
                     MouseArea { id: netSettingsMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.close(); Quickshell.execDetached(["nm-connection-editor"]); } }
                 }
             }
@@ -297,7 +298,8 @@ BarPopup {
                             font.weight: devRow.modelData.connected ? Font.Bold : Font.Normal
                         }
                         SText {
-                            anchors.right: parent.right; anchors.rightMargin: 14
+                            anchors.right: forget.visible ? forget.left : parent.right
+                            anchors.rightMargin: forget.visible ? 6 : 14
                             anchors.verticalCenter: parent.verticalCenter
                             text: devRow.busy ? "…"
                                 : devRow.modelData.connected ? (devRow.modelData.batteryAvailable ? Math.round(devRow.modelData.battery * 100) + "% · " : "") + "Connected"
@@ -314,13 +316,25 @@ BarPopup {
                                 else { d.trusted = true; d.pair(); }
                             }
                         }
+                        // forget a paired device (what blueman was needed for)
+                        Rectangle {
+                            id: forget
+                            visible: devRow.modelData.paired && (bm.containsMouse || fm.containsMouse)
+                            anchors.right: parent.right; anchors.rightMargin: 6
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: 34; height: 34; radius: 17
+                            color: fm.containsMouse ? Qt.rgba(Theme.error.r, Theme.error.g, Theme.error.b, 0.2) : "transparent"
+                            Icon { anchors.centerIn: parent; code: 0xF0A7A; size: 16; color: fm.containsMouse ? Theme.error : Theme.subtext }
+                            MouseArea { id: fm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: devRow.modelData.forget() }
+                        }
                     }
                 }
-                Rectangle {
-                    width: parent.width; height: 40; radius: 20
-                    color: btSettingsMa.containsMouse ? Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.06) : "transparent"
-                    SText { anchors.centerIn: parent; text: "Bluetooth settings…"; color: Theme.primary; font.pixelSize: 12 }
-                    MouseArea { id: btSettingsMa; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: { root.close(); Quickshell.execDetached(["blueman-manager"]); } }
+                SText {
+                    visible: !!root.bt && root.bt.enabled && root.btDevices.length > 0
+                    width: parent.width; padding: 10
+                    horizontalAlignment: Text.AlignHCenter
+                    text: "Searching nearby · new devices appear here"
+                    dim: true; font.pixelSize: 11
                 }
             }
         }
@@ -333,6 +347,85 @@ BarPopup {
             muted: Audio.muted
             onMoved: v => Audio.setVolume(v)
             onIconClicked: Audio.toggleMute()
+            expandable: true
+            expanded: root.expandedList === "audio"
+            onExpandClicked: root.expandedList = root.expandedList === "audio" ? "" : "audio"
+        }
+
+        // ---- sound list: output, input, per-app volume ----
+        Rectangle {
+            visible: root.expandedList === "audio"
+            Layout.fillWidth: true
+            Layout.preferredHeight: audioCol.implicitHeight + 16
+            radius: 20
+            color: Theme.surfaceLow
+
+            Column {
+                id: audioCol
+                x: 8; y: 8
+                width: parent.width - 16
+                spacing: 2
+
+                Repeater {
+                    model: [
+                        { title: "Output", list: Audio.outputs, current: Audio.sink, icon: 0xF04C3, use: n => Audio.useOutput(n) },
+                        { title: "Input", list: Audio.inputs, current: Audio.source, icon: 0xF036C, use: n => Audio.useInput(n) }
+                    ]
+                    Column {
+                        id: sect
+                        required property var modelData
+                        width: audioCol.width
+                        visible: modelData.list.length > 0
+                        SText { text: sect.modelData.title; dim: true; font.pixelSize: 11; leftPadding: 14; topPadding: 6; bottomPadding: 4 }
+                        Repeater {
+                            model: sect.modelData.list
+                            Rectangle {
+                                id: devItem
+                                required property var modelData
+                                readonly property bool current: sect.modelData.current === modelData
+                                width: sect.width; height: 46; radius: 23
+                                color: current ? Theme.secondaryContainer
+                                     : dm.containsMouse ? Qt.rgba(Theme.text.r, Theme.text.g, Theme.text.b, 0.06) : "transparent"
+                                Icon { x: 14; anchors.verticalCenter: parent.verticalCenter; code: sect.modelData.icon; size: 18 }
+                                SText {
+                                    x: 44; anchors.verticalCenter: parent.verticalCenter
+                                    width: parent.width - 58
+                                    text: Audio.deviceName(devItem.modelData)
+                                    font.weight: devItem.current ? Font.Bold : Font.Normal
+                                }
+                                MouseArea { id: dm; anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor; onClicked: sect.modelData.use(devItem.modelData) }
+                            }
+                        }
+                    }
+                }
+
+                SText {
+                    text: "Apps"; dim: true; font.pixelSize: 11; leftPadding: 14; topPadding: 6; bottomPadding: 4
+                }
+                SText {
+                    visible: Audio.apps.length === 0
+                    width: parent.width; leftPadding: 14; bottomPadding: 8
+                    text: "No apps are playing sound"; dim: true
+                }
+                Repeater {
+                    model: Audio.apps
+                    Column {
+                        id: appItem
+                        required property var modelData
+                        width: audioCol.width
+                        spacing: 2
+                        SText { text: Audio.appName(appItem.modelData); width: parent.width; leftPadding: 14; font.pixelSize: 12 }
+                        QsSlider {
+                            width: parent.width
+                            icon: appItem.modelData.audio && appItem.modelData.audio.muted ? 0xF075F : 0xF057E
+                            value: appItem.modelData.audio ? appItem.modelData.audio.volume : 0
+                            muted: appItem.modelData.audio ? appItem.modelData.audio.muted : false
+                            onMoved: v => { if (appItem.modelData.audio) { appItem.modelData.audio.muted = false; appItem.modelData.audio.volume = v; } }
+                            onIconClicked: if (appItem.modelData.audio) appItem.modelData.audio.muted = !appItem.modelData.audio.muted
+                        }
+                    }
+                }
+            }
         }
         QsSlider {
             Layout.fillWidth: true

@@ -73,9 +73,10 @@ Page {
         spacing: 10
         Repeater {
             model: [
-                { label: "Wi-Fi", icon: 0xF05A9, cmd: "nm-connection-editor" },
-                { label: "Bluetooth", icon: 0xF00AF, cmd: "blueman-manager" },
-                { label: "Sound", icon: 0xF057E, cmd: "pavucontrol" },
+                { label: "Wi-Fi", icon: 0xF05A9, cmd: "~/.local/bin/qs-panel quicksettings wifi" },
+                { label: "Advanced network", icon: 0xF0318, cmd: "nm-connection-editor" },
+                { label: "Bluetooth", icon: 0xF00AF, cmd: "~/.local/bin/qs-panel quicksettings bt" },
+                { label: "Sound", icon: 0xF057E, cmd: "~/.local/bin/qs-panel quicksettings audio" },
                 { label: "GTK appearance", icon: 0xF03D8, cmd: "nwg-look" },
                 { label: "Hyprland config", icon: 0xF0493, cmd: "kitty -e ${EDITOR:-nano} ~/.config/hypr/config/settings.lua" }
             ]

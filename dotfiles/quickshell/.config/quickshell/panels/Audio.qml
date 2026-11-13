@@ -3,7 +3,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Services.Pipewire
 
-// Default speaker + microphone from PipeWire.
+// Default speaker + microphone from PipeWire, plus the device and app lists
+// Quick Settings shows (what pavucontrol used to be for).
 Singleton {
     id: root
     readonly property var sink: Pipewire.defaultAudioSink
@@ -18,5 +19,19 @@ Singleton {
     function setMic(v) { if (source && source.audio) { source.audio.muted = false; source.audio.volume = Math.max(0, Math.min(1, v)); } }
     function toggleMic() { if (source && source.audio) source.audio.muted = !source.audio.muted; }
 
-    PwObjectTracker { objects: [root.sink, root.source] }
+    readonly property var nodes: Pipewire.nodes.values
+    readonly property var outputs: nodes.filter(n => n.audio && n.isSink && !n.isStream)
+    readonly property var inputs: nodes.filter(n => n.audio && !n.isSink && !n.isStream)
+    readonly property var apps: nodes.filter(n => n.audio && n.isStream && n.isSink)    // apps playing sound
+
+    function deviceName(n) { return n ? (n.description || n.nickname || n.name) : ""; }
+    function appName(n) {
+        if (!n) return "";
+        const p = n.properties || {};
+        return p["application.name"] || n.description || n.name;
+    }
+    function useOutput(n) { Pipewire.preferredDefaultAudioSink = n; }
+    function useInput(n) { Pipewire.preferredDefaultAudioSource = n; }
+
+    PwObjectTracker { objects: [root.sink, root.source].concat(root.apps) }
 }
