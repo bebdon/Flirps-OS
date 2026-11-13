@@ -8,7 +8,6 @@ xdg-desktop-portal-hyprland
 quickshell
 waybar
 swaync
-swayosd
 nwg-dock-hyprland
 nwg-look
 sddm

@@ -8,6 +8,7 @@ Singleton {
     id: root
     property real value: 0.5          // 0..1
     property real pending: -1
+    signal refreshed()                // after every read, even if the value didn't change
 
     function refresh() { if (!reader.running) reader.running = true; }
     function set(v) {
@@ -23,6 +24,7 @@ Singleton {
             onStreamFinished: {
                 const p = this.text.split(",");   // name,class,current,percent,max
                 if (p.length >= 5) root.value = Number(p[2]) / Number(p[4]);
+                root.refreshed();
             }
         }
     }

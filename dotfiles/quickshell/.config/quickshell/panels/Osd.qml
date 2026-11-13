@@ -4,8 +4,10 @@ import Quickshell.Io
 import Quickshell.Hyprland
 import Quickshell.Wayland
 
-// On-screen popup for Caps Lock / Num Lock / Scroll Lock and keyboard layout changes.
-// Lock keys trigger `qs -c panels ipc call osd locks` from non-consuming Hyprland binds;
+// On-screen popup for volume, microphone, brightness, Caps Lock / Num Lock and keyboard layout.
+// Volume and mic changes come straight from PipeWire (whatever changed them);
+// brightness keys run brightnessctl, then `qs -c panels ipc call osd brightness`;
+// lock keys trigger `qs -c panels ipc call osd locks` from non-consuming Hyprland binds;
 // layout changes come straight from Hyprland's event stream.
 PanelWindow {
     id: root
@@ -26,10 +28,12 @@ PanelWindow {
     property string title: ""
     property string detail: ""
     property bool on: false
+    property real level: -1          // 0..1 shows a level bar; -1 hides it
     property var last: ({})
 
-    function show(ic, t, d, isOn) {
+    function show(ic, t, d, isOn, lvl) {
         icon = ic; title = t; detail = d; on = isOn;
+        level = (lvl === undefined) ? -1 : lvl;
         hideTimer.restart();
         closeTimer.stop();
         visible = true;
@@ -65,6 +69,37 @@ PanelWindow {
     property string pendingKey: ""
     function locks(key) { pendingKey = key || ""; delay.restart(); }
     Component.onCompleted: checkLocks()   // remember the starting state
+
+    // PipeWire reports the starting volume once at startup; don't pop up for that.
+    property bool ready: false
+    Timer { running: true; interval: 1500; onTriggered: root.ready = true }
+
+    function volumeOsd() {
+        if (!ready || !Audio.sink) return;
+        const v = Audio.volume;
+        const ic = Audio.muted ? 0xF075F : v > 0.5 ? 0xF057E : v > 0.15 ? 0xF0580 : 0xF057F;
+        show(ic, "Volume", Audio.muted ? "Muted" : Math.round(v * 100) + "%", !Audio.muted, Audio.muted ? 0 : v);
+    }
+    function brightness() { wantBrightness = true; Brightness.refresh(); }
+    property bool wantBrightness: false
+
+    Connections {
+        target: Audio
+        function onVolumeChanged() { root.volumeOsd(); }
+        function onMutedChanged() { root.volumeOsd(); }
+        function onMicMutedChanged() {
+            if (!root.ready || !Audio.source) return;
+            root.show(Audio.micMuted ? 0xF036D : 0xF036C, "Microphone", Audio.micMuted ? "Muted" : "On", !Audio.micMuted);
+        }
+    }
+    Connections {
+        target: Brightness
+        function onRefreshed() {
+            if (!root.wantBrightness) return;
+            root.wantBrightness = false;
+            root.show(0xF00DF, "Brightness", Math.round(Brightness.value * 100) + "%", true, Brightness.value);
+        }
+    }
 
     Connections {
         target: Hyprland
@@ -112,7 +147,22 @@ PanelWindow {
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 SText { text: root.title; font.pixelSize: 14; font.weight: Font.Bold }
-                SText { text: root.detail; font.pixelSize: 12; color: root.on ? Theme.primary : Theme.subtext }
+                Row {
+                    spacing: 10
+                    Rectangle {
+                        visible: root.level >= 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 140; height: 6; radius: 3
+                        color: Theme.surfaceHighest
+                        Rectangle {
+                            width: parent.width * Math.max(0, Math.min(1, root.level))
+                            height: parent.height; radius: 3
+                            color: root.on ? Theme.primary : Theme.subtext
+                            Behavior on width { NumberAnimation { duration: 120; easing.type: Easing.OutCubic } }
+                        }
+                    }
+                    SText { text: root.detail; font.pixelSize: 12; color: root.on ? Theme.primary : Theme.subtext }
+                }
             }
         }
     }

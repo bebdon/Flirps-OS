@@ -86,6 +86,7 @@ ShellRoot {
     IpcHandler {
         target: "osd"
         function locks(key: string): void { osd.locks(key); }
+        function brightness(): void { osd.brightness(); }
         function show(title: string, detail: string): void { osd.show(0xF02FC, title, detail, true); }
     }
 }

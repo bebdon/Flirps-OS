@@ -141,7 +141,7 @@
     "tooltip-format": "Volume {volume}%",
     "on-click": "~/.local/bin/qs-panel quicksettings",
     "on-click-middle": "pavucontrol",
-    "on-click-right": "swayosd-client --output-volume mute-toggle",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     "scroll-step": 5
   },
   "battery": {
