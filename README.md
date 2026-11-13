@@ -29,9 +29,7 @@ Existing configs that would be overwritten are moved to `~/.flirps-backup/<date>
 | Part | Used for |
 |---|---|
 | Hyprland | Window manager (Lua config in `dotfiles/hypr`) |
-| Quickshell | Panels: launcher, dashboard, quick settings, media, clipboard, notes, calculator, wallpapers, power menu |
-| Waybar, swaync, swayosd | Bar, notifications, volume and brightness popups |
-| nwg-dock | Dock |
+| Quickshell | The whole desktop shell: bar, dock, notifications, volume/brightness popups, quick settings (Wi-Fi, Bluetooth, sound), launcher, dashboard, media, clipboard, notes, calculator, wallpapers, power menu, admin-password dialog, settings app |
 | kitty, Thunar | Terminal, file manager |
 | hyprlock, hypridle, SDDM | Lock screen, idle handling, matching login screen |
 

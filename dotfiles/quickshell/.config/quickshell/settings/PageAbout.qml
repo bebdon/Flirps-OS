@@ -99,7 +99,11 @@ Page {
         PillButton { text: "GitHub"; filled: false; color: Theme.surfaceHigh; onClicked: Quickshell.execDetached(["xdg-open", "https://github.com/ilyamiro/serpantinum"]) }
     }
     OptionRow {
-        icon: 0xF03D8; title: "matugen, awww, waybar, swaync, nwg-dock, hypridle"
-        description: "Colours from your wallpaper, wallpaper transitions, bar, notifications, dock and idle handling."
+        icon: 0xF03D8; title: "Quickshell, matugen, awww, hypridle"
+        description: "The bar, dock, notifications and panels; colours from your wallpaper; wallpaper transitions; idle handling."
+    }
+    OptionRow {
+        icon: 0xF003B; title: "nwg-dock-hyprland by nwg-piotr"
+        description: "The dock's look and its launcher and running-app indicator images (MIT)."
     }
 }

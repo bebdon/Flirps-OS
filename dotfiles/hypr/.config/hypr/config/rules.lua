@@ -1,4 +1,4 @@
-for _, ns in ipairs({ "qs-bar", "launcher", "qs-dock", "qs-launcher", "qs-power", "qs-clipboard", "qs-wallpapers" }) do
+for _, ns in ipairs({ "qs-bar", "launcher", "qs-dock", "qs-launcher", "qs-power", "qs-polkit", "qs-clipboard", "qs-wallpapers" }) do
   hl.layer_rule({ match = { namespace = "^" .. ns .. "$" }, blur = true, ignore_alpha = 0.3 })
 end
 
@@ -12,7 +12,7 @@ hl.window_rule({
 })
 
 -- Quickshell overlays animate themselves; skip Hyprland's layer animation so they don't animate twice.
-for _, ns in ipairs({ "qs-launcher", "qs-power", "qs-clipboard", "qs-wallpapers", "qs-quicksettings", "qs-dashboard", "qs-media", "qs-tool", "qs-desktop", "qs-osd", "qs-notifs", "qs-notifcenter" }) do
+for _, ns in ipairs({ "qs-launcher", "qs-power", "qs-clipboard", "qs-wallpapers", "qs-quicksettings", "qs-dashboard", "qs-media", "qs-tool", "qs-desktop", "qs-osd", "qs-notifs", "qs-notifcenter", "qs-polkit" }) do
   hl.layer_rule({ match = { namespace = "^" .. ns .. "$" }, no_anim = true })
 end
 -- blur behind the drop-down popups and floating tools too

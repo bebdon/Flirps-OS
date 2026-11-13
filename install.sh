@@ -71,6 +71,10 @@ for pkg in */; do
     done
 done
 if [ -d "$backup" ]; then echo "Existing configs backed up to $backup"; fi
+# Remove links left behind by config folders a newer Flirps OS no longer ships.
+find "$HOME/.config" "$HOME/.local/bin" -maxdepth 1 -xtype l 2>/dev/null | while IFS= read -r l; do
+    case "$(readlink -m "$l")" in "$REPO"/*) rm -f "$l" ;; esac
+done
 # Shared folders must exist as real folders, or stow would link them wholesale into the repo.
 mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share"
 stow --restow -t "$HOME" */
