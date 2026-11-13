@@ -25,9 +25,11 @@ ShellRoot {
     TimerTool { id: timerTool }
     NotesTool { id: notesTool }
     Osd { id: osd }
+    NotifPopups { }
+    NotifCenter { id: notifCenter }
     Rotator { id: rotator }
 
-    function closeAll() { launcher.close(); power.close(); clip.close(); walls.close(); qs.close(); dash.close(); media.close(); }
+    function closeAll() { launcher.close(); power.close(); clip.close(); walls.close(); qs.close(); dash.close(); media.close(); notifCenter.close(); }
 
     IpcHandler {
         target: "launcher"
@@ -88,5 +90,10 @@ ShellRoot {
         function locks(key: string): void { osd.locks(key); }
         function brightness(): void { osd.brightness(); }
         function show(title: string, detail: string): void { osd.show(0xF02FC, title, detail, true); }
+    }
+    IpcHandler {
+        target: "notifcenter"
+        function toggle(): void { const v = notifCenter.shown; shellRoot.closeAll(); if (!v) notifCenter.open(); }
+        function close(): void { notifCenter.close(); }
     }
 }

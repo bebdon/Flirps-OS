@@ -27,7 +27,7 @@ ShellRoot {
             { id: "input", label: "Input", icon: 0xF037D, keys: "mouse touchpad scroll acceleration" },
             { id: "bar", label: "Bar", icon: 0xF056E, keys: "waybar height position margin" },
             { id: "dock", label: "Dock", icon: 0xF003B, keys: "nwg autohide icon size" },
-            { id: "notifications", label: "Notifications", icon: 0xF009A, keys: "swaync dnd do not disturb sound timeout" },
+            { id: "notifications", label: "Notifications", icon: 0xF009A, keys: "popups dnd do not disturb sound timeout" },
             { id: "idle", label: "Idle", icon: 0xF04B2, keys: "hypridle lock suspend dim timeout caffeine" },
             { id: "widgets", label: "Widgets & Tools", icon: 0xF0D6D, keys: "desktop clock weather notes calculator timer stopwatch" },
             { id: "about", label: "About " + Brand.name, icon: 0xF02FC, keys: "about version system info credits flirps" }

@@ -7,7 +7,6 @@ hyprsunset
 xdg-desktop-portal-hyprland
 quickshell
 waybar
-swaync
 nwg-dock-hyprland
 nwg-look
 sddm
@@ -17,6 +16,7 @@ matugen
 awww
 qt6ct
 adw-gtk-theme
+breeze-icons
 imagemagick
 
 # Apps

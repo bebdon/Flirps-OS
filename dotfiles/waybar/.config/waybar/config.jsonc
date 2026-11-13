@@ -74,7 +74,7 @@
     "max-length": 40,
     "on-click": "~/.local/bin/qs-panel media",
     "on-click-middle": "playerctl play-pause",
-    "on-click-right": "swaync-client -t -sw",
+    "on-click-right": "~/.local/bin/qs-panel notifcenter",
     "on-scroll-up": "playerctl next",
     "on-scroll-down": "playerctl previous",
     "tooltip-format": "{title}\n{artist} — {album}"
@@ -89,7 +89,7 @@
       }
     },
     "on-click": "~/.local/bin/qs-panel dashboard",
-    "on-click-right": "swaync-client -t -sw"
+    "on-click-right": "~/.local/bin/qs-panel notifcenter"
   },
   "tray": {
     "icon-size": 16,

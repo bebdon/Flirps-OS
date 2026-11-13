@@ -1,0 +1,10 @@
+{
+  "x": "right",
+  "y": "top",
+  "width": 380,
+  "iconSize": 42,
+  "timeout": 6,
+  "timeoutLow": 4,
+  "timeoutCritical": 0,
+  "sound": true
+}

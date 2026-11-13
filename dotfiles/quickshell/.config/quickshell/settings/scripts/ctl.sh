@@ -8,7 +8,7 @@ HYPR=~/.config/hypr/config/settings.lua
 MON=~/.config/hypr/config/monitors.lua
 AUTO=~/.config/hypr/config/autostart.lua
 BAR=~/.config/waybar/config.jsonc
-NOTIF=~/.config/swaync/config.json
+NOTIF=~/.config/quickshell/panels/notifications.json
 IDLE=~/.config/hypr/hypridle.conf
 NIGHT=~/.config/waybar/scripts/nightlight
 WALLCONF=~/.config/wallpaper.conf
@@ -85,7 +85,7 @@ state() {
     local scheme=scheme-tonal-spot mode=dark
     [ -f "$WALLCONF" ] && . "$WALLCONF" && scheme=${SCHEME:-$scheme} && mode=${MODE:-$mode}
     local nl=false; pgrep -x hyprsunset >/dev/null && nl=true
-    local dnd; dnd=$(swaync-client -D 2>/dev/null || echo false)
+    local dnd; dnd=$(qs -c panels ipc call notifications getDnd 2>/dev/null); [ "$dnd" = true ] || dnd=false
 
     jq -n \
       --arg wall "$(cat ~/.cache/wallpaper/current 2>/dev/null)" \
@@ -128,9 +128,8 @@ state() {
         display: { scale: $scale, nightlight: $nl, nightlight_temp: $nl_temp, power: $power },
         bar: { position: $bar_pos, height: $bar_height, margin: $bar_margin },
         dock: { mode: $dock_mode, size: $dock_size, position: $dock_pos },
-        notif: { x: $notif[0].positionX, y: $notif[0].positionY, timeout: $notif[0].timeout,
-                 width: $notif[0]["notification-window-width"],
-                 sound: (($notif[0].scripts.sound.urgency // ".*") == ".*"), dnd: $dnd },
+        notif: { x: $notif[0].x, y: $notif[0].y, timeout: $notif[0].timeout,
+                 width: $notif[0].width, sound: $notif[0].sound, dnd: $dnd },
         idle: { enabled: $idle_running, dim: $idle_dim, lock: $idle_lock, dpms: $idle_dpms, suspend: $idle_suspend }
       }'
 }
@@ -200,14 +199,14 @@ set_dock() {
 set_notif() {
     local k="$1" v="$2"
     case "$k" in
-        x) json_set "$NOTIF" --arg v "$v" '.positionX = $v' ;;
-        y) json_set "$NOTIF" --arg v "$v" '.positionY = $v' ;;
+        x) json_set "$NOTIF" --arg v "$v" '.x = $v' ;;
+        y) json_set "$NOTIF" --arg v "$v" '.y = $v' ;;
         timeout) json_set "$NOTIF" --argjson v "$v" '.timeout = $v' ;;
-        width) json_set "$NOTIF" --argjson v "$v" '.["notification-window-width"] = $v' ;;
-        sound) json_set "$NOTIF" --argjson v "$v" '.scripts.sound.urgency = (if $v then ".*" else "^never$" end)' ;;
-        dnd) [ "$v" = true ] && swaync-client -dn >/dev/null || swaync-client -df >/dev/null; return ;;
+        width) json_set "$NOTIF" --argjson v "$v" '.width = $v' ;;
+        sound) json_set "$NOTIF" --argjson v "$v" '.sound = $v' ;;
+        dnd) qs -c panels ipc call notifications setDnd "$v" >/dev/null 2>&1 ;;
     esac
-    swaync-client -R >/dev/null 2>&1
+    # quickshell watches notifications.json, nothing to reload
 }
 
 set_idle() {
