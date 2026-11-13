@@ -9,7 +9,7 @@ A Hyprland desktop for Arch Linux whose colors follow your wallpaper. Pick a wal
 Start from a fresh, minimal Arch install with a normal user that has `sudo`, then:
 
 ```sh
-git clone https://github.com/bebdon/flirps-os.git ~/flirps-os
+git clone https://github.com/bebdon/Flirps-OS.git ~/flirps-os
 cd ~/flirps-os
 ./install.sh
 ```
