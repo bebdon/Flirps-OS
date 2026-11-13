@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 Page {
-    SectionTitle { text: "nwg-dock" }
+    SectionTitle { text: "Dock" }
     OptionRow {
         icon: 0xF003B; title: "Behaviour"
         Dropdown {

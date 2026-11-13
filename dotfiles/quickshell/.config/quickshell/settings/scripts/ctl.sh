@@ -12,6 +12,7 @@ NOTIF=~/.config/quickshell/panels/notifications.json
 IDLE=~/.config/hypr/hypridle.conf
 NIGHT=~/.local/bin/nightlight
 WALLCONF=~/.config/wallpaper.conf
+DOCK=~/.config/quickshell/panels/dock.json
 
 # ---- helpers -------------------------------------------------------------
 
@@ -39,7 +40,6 @@ json_set() { # file jq-filter [args...]
     rm -f "$tmp"
 }
 
-dock_line() { grep -m1 -oP 'hl\.exec_cmd\("\Knwg-dock-hyprland[^"]*' "$AUTO"; }
 
 idle_get() { # dim|lock|dpms|suspend
     awk -v want="$1" '
@@ -78,10 +78,6 @@ conf_get() { local v; v=$(grep -m1 "^$1=" "$WALLCONF" 2>/dev/null | cut -d= -f2-
 # ---- state ---------------------------------------------------------------
 
 state() {
-    local dl; dl=$(dock_line)
-    local dock_mode=resident; [[ "$dl" == *" -d "* ]] && dock_mode=autohide
-    local dock_size; dock_size=$(grep -oP -- '-i \K[0-9]+' <<<"$dl")
-    local dock_pos; dock_pos=$(grep -oP -- '-p \K\w+' <<<"$dl")
     local scheme=scheme-tonal-spot mode=dark
     [ -f "$WALLCONF" ] && . "$WALLCONF" && scheme=${SCHEME:-$scheme} && mode=${MODE:-$mode}
     local nl=false; pgrep -x hyprsunset >/dev/null && nl=true
@@ -112,7 +108,7 @@ state() {
       --slurpfile notif "$NOTIF" \
       --argjson dnd "$dnd" \
       --slurpfile bar "$BAR" \
-      --arg dock_mode "$dock_mode" --argjson dock_size "${dock_size:-44}" --arg dock_pos "${dock_pos:-bottom}" \
+      --slurpfile dock "$DOCK" \
       --argjson idle_dim "$(idle_get dim)" --argjson idle_lock "$(idle_get lock)" \
       --argjson idle_dpms "$(idle_get dpms)" --argjson idle_suspend "$(idle_get suspend)" \
       --argjson idle_running "$(pgrep -x hypridle >/dev/null && echo true || echo false)" \
@@ -125,7 +121,7 @@ state() {
                 natural_scroll: $natural_scroll, accel: $accel, anim: $anim },
         display: { scale: $scale, nightlight: $nl, nightlight_temp: $nl_temp, power: $power },
         bar: { position: $bar[0].position, height: $bar[0].height, margin: $bar[0].margin },
-        dock: { mode: $dock_mode, size: $dock_size, position: $dock_pos },
+        dock: { mode: $dock[0].mode, size: $dock[0].size, position: $dock[0].position },
         notif: { x: $notif[0].x, y: $notif[0].y, timeout: $notif[0].timeout,
                  width: $notif[0].width, sound: $notif[0].sound, dnd: $dnd },
         idle: { enabled: $idle_running, dim: $idle_dim, lock: $idle_lock, dpms: $idle_dpms, suspend: $idle_suspend }
@@ -177,19 +173,12 @@ set_bar() {
 
 set_dock() {
     local k="$1" v="$2"
-    local dl; dl=$(dock_line)
-    local mode=-r; [[ "$dl" == *" -d "* ]] && mode=-d
-    local size; size=$(grep -oP -- '-i \K[0-9]+' <<<"$dl"); size=${size:-44}
-    local pos; pos=$(grep -oP -- '-p \K\w+' <<<"$dl"); pos=${pos:-bottom}
     case "$k" in
-        mode) [ "$v" = autohide ] && mode=-d || mode=-r ;;
-        size) size="$v" ;;
-        position) pos="$v" ;;
+        mode)     json_set "$DOCK" --arg v "$v" '.mode = $v' ;;
+        size)     json_set "$DOCK" --argjson v "$v" '.size = $v' ;;
+        position) json_set "$DOCK" --arg v "$v" '.position = $v' ;;
     esac
-    local m=-mb; case "$pos" in top) m=-mt ;; left) m=-ml ;; right) m=-mr ;; esac
-    local cmd="nwg-dock-hyprland $mode -i $size $m 6 -p $pos -c '$HOME/.local/bin/qs-panel launcher' -s style.css"
-    CMD="$cmd" perl -pi -e 's/hl\.exec_cmd\("nwg-dock-hyprland[^"]*"\)/hl.exec_cmd("$ENV{CMD}")/' "$AUTO"
-    restart nwg-dock-hyprland sh -c "$cmd"
+    # quickshell watches dock.json, nothing to reload
 }
 
 set_notif() {

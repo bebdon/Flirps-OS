@@ -6,7 +6,6 @@ hyprpolkitagent
 hyprsunset
 xdg-desktop-portal-hyprland
 quickshell
-nwg-dock-hyprland
 nwg-look
 sddm
 

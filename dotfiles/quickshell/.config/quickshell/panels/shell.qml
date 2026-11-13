@@ -26,6 +26,7 @@ ShellRoot {
     NotesTool { id: notesTool }
     Osd { id: osd }
     Bar { }
+    Dock { }
     NotifPopups { }
     NotifCenter { id: notifCenter }
     Rotator { id: rotator }

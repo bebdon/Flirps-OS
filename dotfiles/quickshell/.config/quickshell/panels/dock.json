@@ -1,0 +1,11 @@
+{
+  "pinned": [
+    "kitty",
+    "thunar",
+    "waterfox"
+  ],
+  "mode": "autohide",
+  "position": "bottom",
+  "size": 44,
+  "margin": 6
+}

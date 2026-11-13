@@ -9,12 +9,18 @@ PopupWindow {
     property string text: ""
     property Component content: null          // optional custom content instead of text
     property bool hovered: false
+    // which screen edge the owner sits on: the tip opens away from it
+    property string edge: BarCfg.position === "bottom" ? "bottom" : "top"
 
     visible: hovered && (text !== "" || content !== null) && delay.done
     color: "transparent"
     anchor.item: target
-    anchor.rect.x: (target.width - implicitWidth) / 2
-    anchor.rect.y: BarCfg.position === "bottom" ? -implicitHeight - 8 : target.height + 8
+    anchor.rect.x: edge === "left" ? 8 : edge === "right" ? -8 : 0
+    anchor.rect.y: edge === "top" ? 8 : edge === "bottom" ? -8 : 0
+    anchor.rect.width: target.width
+    anchor.rect.height: target.height
+    anchor.edges: edge === "top" ? Edges.Bottom : edge === "bottom" ? Edges.Top : edge === "left" ? Edges.Right : Edges.Left
+    anchor.gravity: anchor.edges
     implicitWidth: box.width
     implicitHeight: box.height
 
