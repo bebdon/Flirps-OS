@@ -1,0 +1,29 @@
+{
+  "clock": {
+    "enabled": true,
+    "x": 0.05,
+    "y": 0.08,
+    "seconds": false,
+    "h24": true
+  },
+  "weather": {
+    "enabled": true,
+    "x": 0.05,
+    "y": 0.34
+  },
+  "system": {
+    "enabled": true,
+    "x": 0.05,
+    "y": 0.52
+  },
+  "music": {
+    "enabled": true,
+    "x": 0.74,
+    "y": 0.7
+  },
+  "notes": {
+    "enabled": false,
+    "x": 0.76,
+    "y": 0.1
+  }
+}

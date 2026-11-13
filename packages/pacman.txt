@@ -1,0 +1,76 @@
+# Desktop
+hyprland
+hypridle
+hyprlock
+hyprpolkitagent
+hyprsunset
+xdg-desktop-portal-hyprland
+quickshell
+waybar
+swaync
+swayosd
+nwg-dock-hyprland
+nwg-look
+sddm
+
+# Theming
+matugen
+awww
+qt6ct
+adw-gtk-theme
+imagemagick
+
+# Apps
+kitty
+fuzzel
+rofi
+thunar
+thunar-archive-plugin
+tumbler
+gvfs
+fastfetch
+pavucontrol
+
+# Clipboard, screenshots, recording
+cliphist
+wl-clipboard
+grim
+slurp
+satty
+wf-recorder
+gpu-screen-recorder
+tesseract-data-eng
+zbar
+
+# System
+pipewire-alsa
+pipewire-pulse
+wireplumber
+networkmanager
+network-manager-applet
+bluez
+bluez-utils
+blueman
+power-profiles-daemon
+brightnessctl
+playerctl
+libnotify
+xdg-user-dirs
+
+# Tools used by scripts
+jq
+fzf
+curl
+python
+python-gobject
+stow
+git
+
+# Fonts
+ttf-jetbrains-mono
+ttf-jetbrains-mono-nerd
+noto-fonts
+noto-fonts-cjk
+noto-fonts-emoji
+ttf-dejavu
+ttf-liberation

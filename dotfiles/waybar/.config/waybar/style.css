@@ -1,0 +1,113 @@
+@import "colors.css";
+
+* {
+    font-family: "JetBrainsMono Nerd Font", "Iosevka Nerd Font Propo", monospace;
+    font-size: 13px;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+}
+
+window#waybar {
+    background: transparent;
+    color: @on_surface;
+}
+
+tooltip {
+    background: alpha(@surface_container, 0.95);
+    border: 1px solid @outline_variant;
+    border-radius: 10px;
+}
+
+tooltip label { color: @on_surface; }
+
+/* Every top-level module is its own floating pill */
+#menu,
+#workspaces,
+#mpris,
+#clock,
+#tray,
+#status,
+#custom-search,
+#custom-power {
+    background: alpha(@surface_container, 0.75);
+    border-radius: 10px;
+    padding: 0 12px;
+}
+
+#menu, #status { padding: 0 4px; }
+
+#custom-settings,
+#custom-launcher,
+#custom-nightlight,
+#idle_inhibitor,
+#custom-shuffle,
+#network,
+#bluetooth,
+#pulseaudio,
+#battery {
+    padding: 0 9px;
+    font-size: 15px;
+}
+
+#custom-settings:hover,
+#custom-launcher:hover,
+#custom-nightlight:hover,
+#idle_inhibitor:hover,
+#custom-shuffle:hover,
+#network:hover,
+#bluetooth:hover,
+#pulseaudio:hover,
+#battery:hover,
+#custom-search:hover {
+    background: alpha(@primary, 0.15);
+    border-radius: 8px;
+}
+
+#custom-nightlight.on,
+#idle_inhibitor.activated { color: @primary; }
+
+#workspaces { padding: 0 4px; }
+
+#workspaces button {
+    color: @on_surface_variant;
+    padding: 0 8px;
+    margin: 6px 2px;
+    border-radius: 8px;
+    background: transparent;
+}
+
+#workspaces button:hover { background: alpha(@primary, 0.15); }
+
+#workspaces button.active {
+    color: @on_primary;
+    background: @primary;
+}
+
+#mpris { color: @on_surface; }
+#mpris.paused { color: @on_surface_variant; }
+
+#clock {
+    font-weight: bold;
+    font-size: 17px;
+    padding: 0 16px;
+}
+
+#battery.warning { color: @tertiary; }
+#battery.critical:not(.charging) { color: @error; }
+#battery.charging { color: @primary; }
+
+#custom-search {
+    color: @on_surface_variant;
+    min-width: 150px;
+}
+
+#custom-power {
+    font-size: 15px;
+    padding: 0 13px;
+}
+
+#custom-power:hover {
+    color: @on_primary;
+    background: @error;
+}

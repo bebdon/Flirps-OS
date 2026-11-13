@@ -1,0 +1,1 @@
+../settings/RoundedImage.qml

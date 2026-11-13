@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Copy the current wallpaper (blurred) and hyprlock's colors into the SDDM login theme,
+# so the login screen keeps matching hyprlock. Called by ~/.local/bin/wallpaper.
+# Usage: sddm-sync [theme-dir]
+
+THEME="${1:-/usr/share/sddm/themes/hyprlock-match}"
+COLORS="$HOME/.config/hypr/colors.conf"
+WALL=$(cat "$HOME/.cache/wallpaper/current" 2>/dev/null)
+
+[ -w "$THEME" ] || { echo "sddm-sync: $THEME is not writable" >&2; exit 1; }
+
+# hyprlock: blur_passes 3, blur_size 8 -> roughly a sigma-14 gaussian at 1080p
+if [ -f "$WALL" ]; then
+    magick "$WALL" -resize 960x540^ -gravity center -extent 960x540 \
+        -blur 0x7 -resize 1920x1080 -quality 90 "jpg:$THEME/.background.tmp" &&
+        mv -f "$THEME/.background.tmp" "$THEME/background.jpg"
+fi
+
+{
+    echo "[General]"
+    echo "background=background.jpg"
+    sed -n 's/^\$\([a-z_]*\) *= *rgb(\([0-9a-fA-F]\{6\}\)).*/\1=#\2/p' "$COLORS"
+} > "$THEME/.theme.tmp" && mv -f "$THEME/.theme.tmp" "$THEME/theme.conf"

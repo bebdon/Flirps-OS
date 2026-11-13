@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Night light on/off using hyprsunset.
+TEMP=4000
+icon='󰖔'
+
+case "$1" in
+    toggle)
+        if pgrep -x hyprsunset >/dev/null; then
+            pkill -x hyprsunset
+        else
+            hyprsunset -t "$TEMP" >/dev/null 2>&1 &
+            disown
+        fi
+        sleep 0.2
+        pkill -RTMIN+8 -x waybar
+        ;;
+    status|*)
+        if pgrep -x hyprsunset >/dev/null; then
+            printf '{"text":"%s","class":"on","tooltip":"Night light on"}\n' "$icon"
+        else
+            printf '{"text":"%s","class":"off","tooltip":"Night light off"}\n' "$icon"
+        fi
+        ;;
+esac

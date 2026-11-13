@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Replaced by the Quickshell clipboard picker.
+exec ~/.local/bin/qs-panel clipboard

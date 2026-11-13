@@ -1,0 +1,8 @@
+# personal / machine state
+dotfiles/quickshell/.config/quickshell/panels/location.json
+# backups and editor junk
+**/.backup/
+*.bak
+*~
+*.swp
+__pycache__/

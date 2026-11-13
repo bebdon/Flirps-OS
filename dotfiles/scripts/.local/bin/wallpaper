@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Set wallpapers with awww and recolor everything with matugen.
+# Usage: wallpaper set <file> | random | next | rotate | pick | restore
+#   rotate = what the rotation timer runs (uses ROTATE_ORDER / ROTATE_POOL from ~/.config/wallpaper.conf)
+#   pick = Quickshell picker, rofi = old picker
+
+DIR="$HOME/Pictures/Wallpapers"
+STATE="$HOME/.cache/wallpaper/current"
+mkdir -p "$(dirname "$STATE")"
+
+# Optional overrides written by the settings app
+SCHEME=scheme-tonal-spot; MODE=dark
+ROTATE=off; ROTATE_MIN=30; ROTATE_ORDER=random; ROTATE_POOL=all
+[ -f "$HOME/.config/wallpaper.conf" ] && . "$HOME/.config/wallpaper.conf"
+
+apply() {
+    local file="$1"
+    [ -f "$file" ] || { notify-send "Wallpaper" "Not found: $file"; exit 1; }
+    pgrep -x awww-daemon >/dev/null || { awww-daemon >/dev/null 2>&1 & sleep 0.5; }
+    local transitions=(fade wipe grow outer)
+    local t=${transitions[RANDOM % ${#transitions[@]}]}
+    awww img "$file" --transition-type "$t" --transition-duration 1.6 \
+        --transition-fps 60 --transition-angle $((RANDOM % 360)) \
+        --transition-pos "0.$((RANDOM % 90 + 10)),0.$((RANDOM % 90 + 10))"
+    echo "$file" > "$STATE"
+    matugen image "$file" -m "$MODE" -t "$SCHEME" --source-color-index 0 >/dev/null 2>&1
+    ~/.local/bin/sddm-sync >/dev/null 2>&1 &
+}
+
+list() {
+    find "$DIR" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \)
+}
+
+# wallpapers used by rotation: all, or only the anime-* ones
+pool() {
+    case "$ROTATE_POOL" in
+        anime) list | grep '/anime-' ;;
+        *)     list ;;
+    esac
+}
+next_in() {   # next file after the current one (alphabetical, wraps around)
+    local cur files; cur=$(cat "$STATE" 2>/dev/null)
+    files=$(sort)
+    awk -v cur="$cur" 'NR==1{first=$0} found{print; exit} $0==cur{found=1} END{if(!found||NR==0) print first}' <<<"$files" | head -1
+}
+
+case "$1" in
+    set)     apply "$2" ;;
+    next)    f=$(pool | next_in); [ -n "$f" ] || f=$(pool | sort | head -1); apply "$f" ;;
+    rotate)  if [ "$ROTATE_ORDER" = next ]; then exec "$0" next; fi
+             cur=$(cat "$STATE" 2>/dev/null)
+             apply "$(pool | grep -vxF "$cur" | shuf -n1)" ;;
+    random)  cur=$(cat "$STATE" 2>/dev/null)
+             apply "$(list | grep -vxF "$cur" | shuf -n1)" ;;
+    pick)    exec ~/.local/bin/qs-panel wallpapers ;;
+    rofi)    ~/.local/bin/wallpaper-thumbs
+             name=$(list | xargs -d '\n' -n1 basename | sort | while read -r n; do
+                        printf '%s\0icon\x1f%s\n' "$n" "$HOME/.cache/wallpaper/thumbs/$n.jpg"
+                    done | rofi -dmenu -i -p "󰍉" -theme ~/.config/rofi/wallpaper.rasi)
+             [ -n "$name" ] && apply "$DIR/$name" ;;
+    restore) if [ -f "$(cat "$STATE" 2>/dev/null)" ]; then apply "$(cat "$STATE")"; else apply "$(list | shuf -n1)"; fi ;;
+    *)       echo "Usage: wallpaper set <file> | random | next | rotate | pick | restore"; exit 1 ;;
+esac

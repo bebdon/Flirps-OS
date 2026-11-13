@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Open the Quickshell settings app, optionally on a page:
+#   settings [home|wallpaper|windows|display|input|bar|dock|notifications|idle]
+QS_SETTINGS_PAGE="${1:-home}" exec qs -n -c settings

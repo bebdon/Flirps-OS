@@ -1,0 +1,177 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 36,
+  "margin-top": 6,
+  "margin-left": 6,
+  "margin-right": 6,
+  "spacing": 6,
+  "exclusive": true,
+  "reload_style_on_change": true,
+  "modules-left": [
+    "group/menu",
+    "hyprland/workspaces",
+    "mpris"
+  ],
+  "modules-center": [
+    "clock"
+  ],
+  "modules-right": [
+    "tray",
+    "group/status",
+    "custom/search",
+    "custom/power"
+  ],
+  "group/menu": {
+    "orientation": "horizontal",
+    "modules": [
+      "custom/settings",
+      "custom/launcher",
+      "custom/nightlight",
+      "idle_inhibitor",
+      "custom/shuffle"
+    ]
+  },
+  "custom/settings": {
+    "format": "󰒓",
+    "tooltip-format": "Flirps OS settings",
+    "on-click": "~/.local/bin/settings"
+  },
+  "custom/launcher": {
+    "format": "󰍉",
+    "tooltip-format": "Search apps",
+    "on-click": "~/.local/bin/qs-panel launcher"
+  },
+  "custom/nightlight": {
+    "exec": "~/.config/waybar/scripts/nightlight status",
+    "return-type": "json",
+    "interval": "once",
+    "signal": 8,
+    "on-click": "~/.config/waybar/scripts/nightlight toggle"
+  },
+  "idle_inhibitor": {
+    "format": "{icon}",
+    "format-icons": {
+      "activated": "󰅶",
+      "deactivated": "󰛊"
+    },
+    "tooltip-format-activated": "Caffeine on: screen stays awake",
+    "tooltip-format-deactivated": "Caffeine off"
+  },
+  "custom/shuffle": {
+    "format": "󰒝",
+    "tooltip-format": "Random wallpaper",
+    "on-click": "~/.local/bin/wallpaper random"
+  },
+  "hyprland/workspaces": {
+    "format": "{id}",
+    "on-click": "activate",
+    "sort-by-number": true
+  },
+  "mpris": {
+    "format": "󰝚  {artist} — {title}",
+    "format-paused": "󰏤  {artist} — {title}",
+    "max-length": 40,
+    "on-click": "~/.local/bin/qs-panel media",
+    "on-click-middle": "playerctl play-pause",
+    "on-click-right": "swaync-client -t -sw",
+    "on-scroll-up": "playerctl next",
+    "on-scroll-down": "playerctl previous",
+    "tooltip-format": "{title}\n{artist} — {album}"
+  },
+  "clock": {
+    "format": "{:%H:%M}",
+    "tooltip-format": "<tt>{calendar}</tt>",
+    "calendar": {
+      "mode": "month",
+      "format": {
+        "today": "<b><u>{}</u></b>"
+      }
+    },
+    "on-click": "~/.local/bin/qs-panel dashboard",
+    "on-click-right": "swaync-client -t -sw"
+  },
+  "tray": {
+    "icon-size": 16,
+    "spacing": 8
+  },
+  "group/status": {
+    "orientation": "horizontal",
+    "modules": [
+      "network",
+      "bluetooth",
+      "pulseaudio",
+      "battery"
+    ]
+  },
+  "network": {
+    "format-wifi": "{icon}",
+    "format-icons": [
+      "󰤟",
+      "󰤢",
+      "󰤥",
+      "󰤨"
+    ],
+    "format-ethernet": "󰈀",
+    "format-disconnected": "󰤮",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+    "tooltip-format-ethernet": "{ifname}",
+    "on-click": "~/.local/bin/qs-panel quicksettings",
+    "on-click-right": "nm-connection-editor"
+  },
+  "bluetooth": {
+    "format": "󰂯",
+    "format-off": "󰂲",
+    "format-disabled": "󰂲",
+    "format-connected": "󰂱",
+    "tooltip-format-connected": "{device_alias}",
+    "on-click": "~/.local/bin/qs-panel quicksettings",
+    "on-click-right": "blueman-manager"
+  },
+  "pulseaudio": {
+    "format": "{icon}",
+    "format-muted": "󰖁",
+    "format-icons": {
+      "default": [
+        "󰕿",
+        "󰖀",
+        "󰕾"
+      ]
+    },
+    "tooltip-format": "Volume {volume}%",
+    "on-click": "~/.local/bin/qs-panel quicksettings",
+    "on-click-middle": "pavucontrol",
+    "on-click-right": "swayosd-client --output-volume mute-toggle",
+    "scroll-step": 5
+  },
+  "battery": {
+    "states": {
+      "warning": 25,
+      "critical": 12
+    },
+    "format": "{icon}",
+    "format-charging": "󰂄",
+    "format-plugged": "󱐋",
+    "format-icons": [
+      "󰁺",
+      "󰁼",
+      "󰁾",
+      "󰂀",
+      "󰂂",
+      "󰁹"
+    ],
+    "tooltip-format": "{capacity}% — {timeTo}",
+    "on-click": "~/.local/bin/qs-panel quicksettings",
+    "on-click-right": "~/.local/bin/settings display"
+  },
+  "custom/power": {
+    "format": "󰐥",
+    "tooltip-format": "Power",
+    "on-click": "~/.local/bin/qs-panel power"
+  },
+  "custom/search": {
+    "format": "󰍉  Find anything…",
+    "tooltip": false,
+    "on-click": "~/.local/bin/qs-panel launcher"
+  }
+}

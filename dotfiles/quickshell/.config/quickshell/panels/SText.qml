@@ -1,0 +1,1 @@
+../settings/SText.qml

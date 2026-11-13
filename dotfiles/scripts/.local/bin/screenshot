@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# Screenshots: area by default. Flags: --full (whole screen), --edit (open in satty), --ocr (copy text).
+DIR="$HOME/Pictures/Screenshots"
+mkdir -p "$DIR"
+FILE="$DIR/Screenshot_$(date +%Y-%m-%d_%H-%M-%S).png"
+
+full=0; edit=0; ocr=0
+for a in "$@"; do
+    case "$a" in
+        --full) full=1 ;;
+        --edit) edit=1 ;;
+        --ocr)  ocr=1 ;;
+    esac
+done
+
+if [ $full -eq 1 ]; then
+    grim "$FILE" || exit 1
+else
+    area=$(slurp -d) || exit 0
+    grim -g "$area" "$FILE" || exit 1
+fi
+
+if [ $ocr -eq 1 ]; then
+    text=$(tesseract "$FILE" - 2>/dev/null)
+    rm -f "$FILE"
+    printf '%s' "$text" | wl-copy
+    notify-send -i edit-copy "Text copied" "$(printf '%s' "$text" | head -c 120)"
+    exit 0
+fi
+
+if [ $edit -eq 1 ]; then
+    satty --filename "$FILE" --output-filename "$FILE" --copy-command wl-copy --early-exit
+else
+    wl-copy < "$FILE"
+    notify-send -i "$FILE" "Screenshot saved" "Copied to clipboard · $(basename "$FILE")"
+fi
