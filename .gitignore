@@ -6,3 +6,6 @@ dotfiles/quickshell/.config/quickshell/panels/location.json
 *~
 *.swp
 __pycache__/
+# generated per machine by install.sh (from templates/)
+dotfiles/hypr/.config/hypr/config/monitors.lua
+dotfiles/qt6ct/.config/qt6ct/qt6ct.conf

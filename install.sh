@@ -42,29 +42,52 @@ fi
 say "Linking configs into $HOME"
 cd "$REPO/dotfiles"
 backup="$HOME/.flirps-backup/$(date +%Y%m%d-%H%M%S)"
-# Move aside real files, and symlinks pointing somewhere other than this repo, that would block stow.
+# Stow links whole folders (~/.config/hypr -> repo), so config edits made by the
+# settings app land in the repo. Shared folders like ~/.config are entered instead.
+is_shared() { case "$1" in .config|.local|.local/bin|.local/share) return 0 ;; esac; return 1; }
+
+# Move aside anything that would block stow: real files/folders, or links to somewhere else.
+clear_target() { # path relative to the package root
+    local rel="$1" target="$HOME/$1"
+    if is_shared "$rel"; then
+        local child
+        for child in "$pkgdir/$rel"/* "$pkgdir/$rel"/.[!.]*; do
+            if [ -e "$child" ]; then clear_target "$rel/${child##*/}"; fi
+        done
+        return 0
+    fi
+    if [ -L "$target" ]; then
+        if [[ "$(readlink -f "$target")" == "$REPO/"* ]]; then return 0; fi
+    elif [ ! -e "$target" ]; then
+        return 0
+    fi
+    mkdir -p "$backup/$(dirname "$rel")"
+    mv "$target" "$backup/$rel"
+}
 for pkg in */; do
-    while IFS= read -r -d '' f; do
-        rel="${f#./}"; target="$HOME/$rel"
-        if { [ -e "$target" ] && [ ! -L "$target" ]; } ||
-           { [ -L "$target" ] && [[ "$(readlink -f "$target")" != "$REPO/"* ]]; }; then
-            mkdir -p "$backup/$(dirname "$rel")"
-            mv "$target" "$backup/$rel"
-        fi
-    done < <(cd "$pkg" && find . -type f -print0)
+    pkgdir="$REPO/dotfiles/${pkg%/}"
+    for entry in "$pkgdir"/* "$pkgdir"/.[!.]*; do
+        if [ -e "$entry" ]; then clear_target "${entry##*/}"; fi
+    done
 done
-[ -d "$backup" ] && echo "Existing configs backed up to $backup"
-stow --no-folding --restow -t "$HOME" */
+if [ -d "$backup" ]; then echo "Existing configs backed up to $backup"; fi
+# Shared folders must exist as real folders, or stow would link them wholesale into the repo.
+mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share"
+stow --restow -t "$HOME" */
 
 say "Writing machine-specific files"
-if [ -z "$SCALE" ]; then
-    read -rp "Display scale (1 for most screens, 1.5-2 for HiDPI laptops) [1]: " SCALE || true
+# These land inside the linked repo folders and are gitignored (they differ per machine).
+# An existing monitors.lua is kept unless --scale is passed, so re-running the
+# installer doesn't undo changes made in the settings app.
+MON="$HOME/.config/hypr/config/monitors.lua"
+if [ -n "$SCALE" ] || [ ! -f "$MON" ]; then
+    if [ -z "$SCALE" ]; then
+        read -rp "Display scale (1 for most screens, 1.5-2 for HiDPI laptops) [1]: " SCALE || true
+    fi
+    SCALE="${SCALE:-1}"
+    [[ "$SCALE" =~ ^[0-9]+(\.[0-9]+)?$ ]] || die "scale must be a number, got '$SCALE'"
+    sed "s|@SCALE@|$SCALE|" "$REPO/templates/monitors.lua" > "$MON"
 fi
-SCALE="${SCALE:-1}"
-[[ "$SCALE" =~ ^[0-9]+(\.[0-9]+)?$ ]] || die "scale must be a number, got '$SCALE'"
-mkdir -p "$HOME/.config/hypr/config" "$HOME/.config/qt6ct"
-rm -f "$HOME/.config/hypr/config/monitors.lua" "$HOME/.config/qt6ct/qt6ct.conf"   # never write through an old symlink
-sed "s|@SCALE@|$SCALE|" "$REPO/templates/monitors.lua" > "$HOME/.config/hypr/config/monitors.lua"
 sed "s|@HOME@|$HOME|"   "$REPO/templates/qt6ct.conf"   > "$HOME/.config/qt6ct/qt6ct.conf"
 
 xdg-user-dirs-update
