@@ -2,7 +2,6 @@
 hyprland
 hypridle
 hyprlock
-hyprpolkitagent
 hyprsunset
 xdg-desktop-portal-hyprland
 quickshell

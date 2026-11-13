@@ -27,6 +27,7 @@ ShellRoot {
     Osd { id: osd }
     Bar { }
     Dock { }
+    Polkit { }
     NotifPopups { }
     NotifCenter { id: notifCenter }
     Rotator { id: rotator }
