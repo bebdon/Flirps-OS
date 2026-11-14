@@ -95,7 +95,14 @@ fi
 sed "s|@HOME@|$HOME|"   "$REPO/templates/qt6ct.conf"   > "$HOME/.config/qt6ct/qt6ct.conf"
 
 xdg-user-dirs-update
-mkdir -p "$HOME/Pictures/Wallpapers"
+# Wallpapers live in the repo; link the folder so new ones land in the repo too
+WALLS="$HOME/Pictures/Wallpapers"
+mkdir -p "$HOME/Pictures"
+if [ -d "$WALLS" ] && [ ! -L "$WALLS" ]; then
+    cp -n "$WALLS"/* "$REPO/wallpapers/" 2>/dev/null || true   # keep any you already had
+    mkdir -p "$backup" && mv "$WALLS" "$backup/Wallpapers"
+fi
+ln -sfn "$REPO/wallpapers" "$WALLS"
 
 if [ "$SDDM" = 1 ]; then
     say "Setting up the login screen"

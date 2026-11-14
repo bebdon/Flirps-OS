@@ -28,7 +28,7 @@ apply() {
 }
 
 list() {
-    find "$DIR" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \)
+    find "$DIR/" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \)
 }
 
 # wallpapers used by rotation: all, or only the anime-* ones
