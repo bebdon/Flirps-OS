@@ -25,8 +25,8 @@ pkgs() { grep -vE '^\s*(#|$)' "$1"; }
 [ "$EUID" -ne 0 ]        || die "Run as your normal user, not root (sudo is used when needed)."
 command -v sudo >/dev/null || die "sudo is required."
 
-# Running inside a virtual machine? (vmware, oracle, kvm, ... or "none")
-VIRT="$(systemd-detect-virt 2>/dev/null || true)"
+# Running inside a virtual machine? (vmware, oracle, kvm, ... or "none"; containers and chroots count as none)
+VIRT="$(systemd-detect-virt --vm 2>/dev/null || true)"
 [ -n "$VIRT" ] || VIRT=none
 if [ "$VIRT" != none ]; then
     say "Virtual machine detected ($VIRT): adding VM tweaks"
@@ -109,9 +109,12 @@ fi
 sed "s|@HOME@|$HOME|"   "$REPO/templates/qt6ct.conf"   > "$HOME/.config/qt6ct/qt6ct.conf"
 MACHINE="$HOME/.config/hypr/config/machine.lua"
 if [ "$VIRT" != none ]; then
-    # VM graphics can't draw a hardware cursor and struggle with heavy blur.
+    # VM graphics can't draw a hardware cursor and struggle with heavy blur. Apps also
+    # draw in software: Hyprland rejects GPU buffers from virtual GPUs (e.g. VMware's
+    # vmwgfx), which kills every OpenGL app (Quickshell, kitty, hyprlock) on its first frame.
     cat > "$MACHINE" <<'LUA'
 -- written by install.sh because this is a virtual machine
+hl.env("LIBGL_ALWAYS_SOFTWARE", "1")
 hl.config({
   cursor = { no_hardware_cursors = true },
   decoration = { blur = { passes = 1 }, shadow = { enabled = false } },
