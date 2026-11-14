@@ -14,13 +14,14 @@ cd ~/flirps-os
 ./install.sh
 ```
 
-Reboot and pick a wallpaper (SUPER+W).
+It reboots when done (press any key to cancel); then pick a wallpaper (SUPER+W).
 
 | Option | What it does |
 |---|---|
 | `--scale 1.6` | Display scale (asked interactively if omitted) |
 | `--no-aur` | Skip AUR packages (the Waterfox browser) |
 | `--no-sddm` | Don't set up the SDDM login screen |
+| `--no-reboot` | Don't reboot at the end (by default it reboots after a 10 s countdown; any key cancels) |
 
 Existing configs that would be overwritten are moved to `~/.flirps-backup/<date>/` first.
 

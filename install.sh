@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # Flirps OS installer: turns a fresh Arch install into the Flirps OS desktop.
-# Usage: ./install.sh [--no-aur] [--no-sddm] [--scale N]
+# Usage: ./install.sh [--no-aur] [--no-sddm] [--no-reboot] [--scale N]
 set -euo pipefail
 
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-AUR=1 SDDM=1 SCALE=""
+AUR=1 SDDM=1 REBOOT=1 SCALE=""
 while [ $# -gt 0 ]; do
     case "$1" in
-        --no-aur)  AUR=0 ;;
-        --no-sddm) SDDM=0 ;;
+        --no-aur)    AUR=0 ;;
+        --no-sddm)   SDDM=0 ;;
+        --no-reboot) REBOOT=0 ;;
         --scale)   SCALE="$2"; shift ;;
         -h|--help) sed -n '2,3p' "$0"; exit 0 ;;
         *) echo "unknown option: $1" >&2; exit 1 ;;
@@ -82,12 +83,14 @@ for pkg in */; do
     done
 done
 if [ -d "$backup" ]; then echo "Existing configs backed up to $backup"; fi
+# Shared folders must exist as real folders, or stow would link them wholesale into the repo.
+# (Also before the find below: on a fresh system ~/.local/bin is missing, and find failing
+# there would end the whole installer silently under set -e/pipefail.)
+mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share"
 # Remove links left behind by config folders a newer Flirps OS no longer ships.
-find "$HOME/.config" "$HOME/.local/bin" -maxdepth 1 -xtype l 2>/dev/null | while IFS= read -r l; do
+find "$HOME/.config" "$HOME/.local/bin" -maxdepth 1 -xtype l | while IFS= read -r l; do
     case "$(readlink -m "$l")" in "$REPO"/*) rm -f "$l" ;; esac
 done
-# Shared folders must exist as real folders, or stow would link them wholesale into the repo.
-mkdir -p "$HOME/.config" "$HOME/.local/bin" "$HOME/.local/share"
 stow --restow -t "$HOME" */
 
 say "Writing machine-specific files"
@@ -149,3 +152,17 @@ Next steps:
   2. Pick a wallpaper (SUPER+W or the settings app) and the theme recolors to match
   3. Add your own wallpapers to ~/Pictures/Wallpapers (it's the repo's wallpapers/ folder)
 MSG
+
+# Reboot after a short countdown; any key cancels. Skipped with --no-reboot or without a terminal.
+if [ "$REBOOT" = 1 ] && [ -t 0 ]; then
+    echo
+    for s in 10 9 8 7 6 5 4 3 2 1; do
+        printf '\rRebooting in %2ds (press any key to cancel)... ' "$s"
+        if read -rsn1 -t 1; then
+            printf '\nReboot cancelled. Run "reboot" when you are ready.\n'
+            exit 0
+        fi
+    done
+    echo
+    sudo systemctl reboot
+fi

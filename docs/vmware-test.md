@@ -51,7 +51,7 @@ The installer notices it's inside VMware and handles the VM side for you:
 - uses a software cursor, since the hardware one is invisible in VMs
 - turns blur down and shadows off, so it stays smooth
 
-Then `reboot`.
+It reboots on its own when it finishes (press any key during the countdown to stay put).
 
 ## 4. What to check
 
