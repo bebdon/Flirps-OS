@@ -7,6 +7,8 @@ import Quickshell.Io
 //   qs -c panels ipc call power toggle
 //   qs -c panels ipc call clipboard toggle
 //   qs -c panels ipc call wallpapers toggle
+//   qs -c panels ipc call cheatsheet toggle      (SUPER+K)
+//   qs -c panels ipc call overview toggle        (SUPER+Tab)
 ShellRoot {
     id: shellRoot
     Launcher { id: launcher }
@@ -20,7 +22,21 @@ ShellRoot {
     }
     Dashboard { id: dash }
     MediaPopup { id: media }
-    Desktop { id: desktop }
+    Desktop {
+        id: desktop
+        onContextMenu: (x, y) => { shellRoot.closeAll(); desktopMenu.openAt(x, y); }
+    }
+    DesktopMenu {
+        id: desktopMenu
+        onWallpapers: walls.open()
+        onEditWidgets: desktop.editing = true
+        onShortcuts: cheatsheet.open()
+    }
+    Cheatsheet { id: cheatsheet }
+    Overview {
+        id: overview
+        onSearchApps: text => launcher.setQuery(text)
+    }
     CalcTool { id: calcTool }
     TimerTool { id: timerTool }
     NotesTool { id: notesTool }
@@ -32,7 +48,23 @@ ShellRoot {
     NotifCenter { id: notifCenter }
     Rotator { id: rotator }
 
-    function closeAll() { launcher.close(); power.close(); clip.close(); walls.close(); qs.close(); dash.close(); media.close(); notifCenter.close(); }
+    function closeAll() { launcher.close(); power.close(); clip.close(); walls.close(); qs.close(); dash.close(); media.close(); notifCenter.close(); cheatsheet.close(); overview.close(); desktopMenu.close(); }
+
+    IpcHandler {
+        target: "cheatsheet"
+        function toggle(): void { const v = cheatsheet.shown; shellRoot.closeAll(); if (!v) cheatsheet.open(); }
+        function close(): void { cheatsheet.close(); }
+    }
+    IpcHandler {
+        target: "overview"
+        function toggle(): void { const v = overview.shown; shellRoot.closeAll(); if (!v) overview.open(); }
+        function close(): void { overview.close(); }
+    }
+    IpcHandler {
+        target: "desktopmenu"
+        function open(x: int, y: int): void { shellRoot.closeAll(); desktopMenu.openAt(x, y); }   // for testing; normally right-click
+        function close(): void { desktopMenu.close(); }
+    }
 
     IpcHandler {
         target: "launcher"

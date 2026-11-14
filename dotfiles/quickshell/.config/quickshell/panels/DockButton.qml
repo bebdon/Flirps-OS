@@ -3,7 +3,7 @@ import Quickshell
 
 // One dock button, laid out like nwg-dock: padding 4, icon, then the running-indicator image
 // (single / multiple dots). Focused app: 2px primary line along the bottom. Hover: primary @ 15%.
-// Left click: launch, focus, or cycle through the app's windows. Middle: new window. Right: menu.
+// Left click: launch, focus, or (several windows) pick one from a list. Middle: new window. Right: menu.
 Item {
     id: btn
     property string appId: ""
@@ -14,7 +14,7 @@ Item {
     property int iconSize: 44
     property bool vertical: false
     property string edge: "bottom"
-    property bool menuOpen: menu.visible
+    property bool menuOpen: menu.visible || picker.visible
     readonly property bool running: wins.length > 0
     readonly property bool active: wins.some(w => w.activated)
     // nwg-dock draws its 48x9 indicator image at half the icon width, in a 7px slot under the icon
@@ -72,11 +72,11 @@ Item {
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
         onClicked: m => {
             if (btn.launcher) { btn.launch(); return; }
-            if (m.button === Qt.RightButton) { menu.visible = !menu.visible; return; }
+            if (m.button === Qt.RightButton) { picker.visible = false; menu.visible = !menu.visible; return; }
             if (m.button === Qt.MiddleButton || !btn.running) { btn.launch(); return; }
-            // focus; if one of its windows is already focused, go to the next one
-            const i = btn.wins.findIndex(w => w.activated);
-            btn.wins[(i + 1) % btn.wins.length].activate();
+            // several windows: show them to pick from; one: just focus it
+            if (btn.wins.length > 1) { menu.visible = false; picker.visible = !picker.visible; return; }
+            btn.wins[0].activate();
             btn.focused();
         }
     }
@@ -85,7 +85,67 @@ Item {
         target: btn
         edge: btn.edge
         text: btn.launcher ? "Applications" : btn.entry ? btn.entry.name : btn.appId
-        hovered: ma.containsMouse && !menu.visible
+        hovered: ma.containsMouse && !menu.visible && !picker.visible
+    }
+
+    // window picker for apps with several windows, styled like the menu below
+    PopupWindow {
+        id: picker
+        visible: false
+        color: "transparent"
+        anchor.item: btn
+        anchor.rect.x: btn.edge === "left" ? 8 : btn.edge === "right" ? -8 : 0
+        anchor.rect.y: btn.edge === "top" ? 8 : btn.edge === "bottom" ? -8 : 0
+        anchor.rect.width: btn.width
+        anchor.rect.height: btn.height
+        anchor.edges: btn.edge === "top" ? Edges.Bottom : btn.edge === "bottom" ? Edges.Top : btn.edge === "left" ? Edges.Right : Edges.Left
+        anchor.gravity: anchor.edges
+        implicitWidth: pickBox.width
+        implicitHeight: pickBox.height
+
+        Rectangle {
+            id: pickBox
+            width: 280
+            height: pickCol.implicitHeight + 12
+            radius: 10
+            color: Qt.rgba(Theme.surfaceMid.r, Theme.surfaceMid.g, Theme.surfaceMid.b, 0.95)
+            border.width: 1
+            border.color: Theme.outlineVariant
+            HoverHandler { onHoveredChanged: if (!hovered) pickClose.restart(); else pickClose.stop() }
+            Timer { id: pickClose; interval: 600; onTriggered: picker.visible = false }
+            Column {
+                id: pickCol
+                x: 6; y: 6
+                width: parent.width - 12
+                Repeater {
+                    model: btn.wins
+                    Rectangle {
+                        id: pw
+                        required property var modelData
+                        width: pickCol.width; height: 34; radius: 8
+                        color: pm.containsMouse ? Qt.rgba(Theme.primary.r, Theme.primary.g, Theme.primary.b, 0.15) : "transparent"
+                        Rectangle {   // the focused window
+                            visible: pw.modelData.activated
+                            x: 4; anchors.verticalCenter: parent.verticalCenter
+                            width: 3; height: 16; radius: 2
+                            color: Theme.primary
+                        }
+                        Text {
+                            x: 14; width: parent.width - 24
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: pw.modelData.title || btn.appId
+                            elide: Text.ElideRight
+                            font.family: Theme.font; font.pixelSize: 13; color: Theme.text
+                        }
+                        MouseArea {
+                            id: pm
+                            anchors.fill: parent; hoverEnabled: true; cursorShape: Qt.PointingHandCursor
+                            onClicked: { pw.modelData.activate(); picker.visible = false; btn.focused(); }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // right-click menu, styled like the tooltips

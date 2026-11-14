@@ -108,6 +108,7 @@ if [ -n "$SCALE" ] || [ ! -f "$MON" ]; then
 fi
 sed "s|@HOME@|$HOME|"   "$REPO/templates/qt6ct.conf"   > "$HOME/.config/qt6ct/qt6ct.conf"
 MACHINE="$HOME/.config/hypr/config/machine.lua"
+LOCK_MACHINE="$HOME/.config/hypr/config/machine-hyprlock.conf"
 if [ "$VIRT" != none ]; then
     # VM graphics can't draw a hardware cursor and struggle with heavy blur. Apps also
     # draw in software: Hyprland rejects GPU buffers from virtual GPUs (e.g. VMware's
@@ -120,8 +121,17 @@ hl.config({
   decoration = { blur = { passes = 1 }, shadow = { enabled = false } },
 })
 LUA
+    # hyprlock's blurred-screenshot background grabs the screen into a GPU buffer, which
+    # Hyprland rejects there too and hyprlock crashes; grab it into normal memory instead.
+    cat > "$LOCK_MACHINE" <<'CONF'
+# written by install.sh because this is a virtual machine
+general {
+    screencopy_mode = 1
+}
+CONF
 else
     rm -f "$MACHINE"
+    echo "# per-machine hyprlock settings (written by install.sh; nothing needed here)" > "$LOCK_MACHINE"
 fi
 
 xdg-user-dirs-update

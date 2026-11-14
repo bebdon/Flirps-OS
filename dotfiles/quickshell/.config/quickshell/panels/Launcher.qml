@@ -9,6 +9,7 @@ import "SearchProviders.js" as Search
 // App launcher (SUPER+D).
 //   type to search apps (most used first)     2*(3+4)  calculator      10 km to mi  conversion
 //   :fire  emoji                              !yt lofi  web search     > cmd        run a command
+//   wifi, dark, lock, update …  system actions (list below)
 // ↑/↓ or Tab to move, Enter to launch / copy, Esc to close.
 PanelWindow {
     id: root
@@ -33,6 +34,42 @@ PanelWindow {
 
     readonly property string q: input.text
     readonly property string mode: q.startsWith(">") ? "cmd" : q.startsWith(":") ? "emoji" : q.startsWith("!") ? "bang" : "apps"
+
+    // System actions, found by typing (e.g. "wifi", "dark", "lock", "update"). cmd runs in sh
+    // just after the launcher closes. Power actions only open the power menu, so a typo can't
+    // reboot the machine.
+    readonly property string ctl: "~/.config/quickshell/settings/scripts/ctl.sh"
+    readonly property var sysActions: [
+        { title: "Lock screen",          words: "lock",                          icon: 0xF033E, cmd: "loginctl lock-session" },
+        { title: "Power menu",           words: "shut down shutdown power off reboot restart log out logout suspend sleep", icon: 0xF0425, cmd: "qs -c panels ipc call power toggle" },
+        { title: "Wi-Fi",                words: "wifi wireless network internet", icon: 0xF05A9, cmd: "~/.local/bin/qs-panel quicksettings wifi" },
+        { title: "Bluetooth",            words: "bluetooth headphones",           icon: 0xF00AF, cmd: "~/.local/bin/qs-panel quicksettings bt" },
+        { title: "Sound",                words: "sound audio volume speakers output microphone", icon: 0xF057E, cmd: "~/.local/bin/qs-panel quicksettings audio" },
+        { title: "Night light",          words: "night light blue warm",          icon: 0xF0594, cmd: "~/.local/bin/nightlight toggle" },
+        { title: "Dark mode",            words: "dark theme",                     icon: 0xF050E, cmd: ctl + " set wallpaper mode dark" },
+        { title: "Light mode",           words: "light theme",                    icon: 0xF050E, cmd: ctl + " set wallpaper mode light" },
+        { title: "Change wallpaper",     words: "wallpaper background picker",    icon: 0xF02E9, cmd: "~/.local/bin/qs-panel wallpapers" },
+        { title: "Shuffle wallpaper",    words: "random wallpaper shuffle background", icon: 0xF049D, cmd: "~/.local/bin/wallpaper random" },
+        { title: "Edit desktop widgets", words: "widgets desktop edit move",      icon: 0xF056E, cmd: "qs -c panels ipc call desktop edit" },
+        { title: "Window overview",      words: "overview windows workspaces",    icon: 0xF0570, cmd: "qs -c panels ipc call overview toggle" },
+        { title: "Keyboard shortcuts",   words: "keyboard shortcuts keybinds hotkeys help", icon: 0xF030C, cmd: "qs -c panels ipc call cheatsheet toggle" },
+        { title: "Screenshot an area",   words: "screenshot capture snip",        icon: 0xF0E51, cmd: "~/.local/bin/screenshot" },
+        { title: "Screenshot the screen", words: "screenshot capture full",       icon: 0xF0E51, cmd: "~/.local/bin/screenshot --full" },
+        { title: "Copy text from the screen", words: "ocr text copy recognise",   icon: 0xF113A, cmd: "~/.local/bin/screenshot --ocr" },
+        { title: "Update the system",    words: "update upgrade packages pacman", icon: 0xF06B0, cmd: "kitty --hold sh -c 'if command -v paru >/dev/null; then paru -Syu; else sudo pacman -Syu; fi'" },
+        { title: "Restart the shell",    words: "restart reload shell bar quickshell", icon: 0xF0709, cmd: "qs kill -c panels; setsid -f qs -c panels" },
+        { title: "Settings",             words: "settings preferences control",   icon: 0xF0493, cmd: "~/.local/bin/settings" },
+        { title: "Display settings",     words: "display monitor screen scale resolution", icon: 0xF0379, cmd: "~/.local/bin/settings display" },
+        { title: "Dock settings",        words: "dock",                           icon: 0xF0493, cmd: "~/.local/bin/settings dock" },
+        { title: "Notification settings", words: "notifications do not disturb", icon: 0xF009A, cmd: "~/.local/bin/settings notifications" }
+    ]
+    // 3 = title starts with it, 2 = a title word does, 1 = a keyword does
+    function actionScore(a, ql) {
+        const title = a.title.toLowerCase();
+        if (title.startsWith(ql)) return 3;
+        if (title.split(/[\s-]+/).some(w => w.startsWith(ql))) return 2;
+        return a.words.split(" ").some(w => w.startsWith(ql)) ? 1 : 0;
+    }
 
     readonly property var apps: DesktopEntries.applications.values
         .filter(a => !a.noDisplay)
@@ -79,7 +116,13 @@ PanelWindow {
             if (s > 0) scored.push({ a, s: s + Math.min(2, (usage[a.id] || 0) / 10) });
         }
         scored.sort((x, y) => y.s - x.s || x.a.name.localeCompare(y.a.name));
+        // system actions: a close match goes above the apps, a loose one below them
+        const acts = ql.length < 2 ? [] : sysActions.map(a => ({ a, s: actionScore(a, ql) })).filter(x => x.s > 0).sort((x, y) => y.s - x.s);
+        const toRow = x => ({ kind: "action", title: x.a.title, subtitle: "System action", cmd: x.a.cmd, icon: x.a.icon });
+        const strong = acts.filter(x => x.s >= 2 && !(scored.length && scored[0].s >= 4));
+        for (const x of strong) out.push(toRow(x));
         for (const x of scored) out.push({ kind: "app", app: x.a });
+        for (const x of acts) if (strong.indexOf(x) < 0) out.push(toRow(x));
         if (!c && !conv) {
             const e = Search.find(Search.DEFAULT_BANG);
             out.push({ kind: "web", title: "Search the web for “" + t + "”", subtitle: e.name + "  ·  tip: !g !yt !w !gh !aw", url: Search.url(e, t), icon: 0xF059F });
@@ -126,6 +169,7 @@ PanelWindow {
         if (r.kind === "app") { bump(r.app.id); r.app.execute(); }
         else if (r.kind === "calc") copy(r.copy);
         else if (r.kind === "cmd") Quickshell.execDetached(["sh", "-c", r.cmd]);
+        else if (r.kind === "action") Quickshell.execDetached(["sh", "-c", "sleep 0.2; " + r.cmd]);
         else if (r.kind === "web") Quickshell.execDetached(["xdg-open", r.url]);
         else if (r.kind === "hint") { input.text = r.fill; return; }
         close();

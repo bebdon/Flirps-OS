@@ -28,6 +28,10 @@ section "quickshell"
 qs list --all 2>&1
 qs log -c panels 2>&1 | tail -80
 
+section "hyprlock (from the lock screen shot)"
+hyprctl layers 2>&1 | grep -i lock || echo "no lock surface"
+tail -40 /tmp/hyprlock.log 2>&1
+
 section "start a GL client by hand (kitty, 5 s)"
 timeout 5 kitty --hold true 2>&1 | tail -20
 

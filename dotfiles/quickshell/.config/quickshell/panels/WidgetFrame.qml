@@ -7,6 +7,10 @@ Item {
     required property string name
     required property var desk
     property bool card: false
+    // The widget stacked above this one (e.g. clock above weather). If they line up
+    // horizontally, this one never goes higher than just below it, so small screens
+    // don't make them overlap. Hidden widgets are skipped.
+    property Item after: null
     default property alias content: inner.data
     readonly property var conf: desk.w(name)
     readonly property bool isOn: conf.enabled === true
@@ -14,9 +18,15 @@ Item {
     visible: isOn
     width: inner.childrenRect.width + (card ? 40 : 0)
     height: inner.childrenRect.height + (card ? 36 : 0)
+    function floorY() {
+        let a = after;
+        while (a && !a.visible) a = a.after;
+        if (!a || a.x >= x + width || x >= a.x + a.width) return 0;
+        return a.y + a.height + 14;
+    }
     function bindPos() {
         x = Qt.binding(() => (conf.x !== undefined ? conf.x : 0.05) * (parent.width - width));
-        y = Qt.binding(() => (conf.y !== undefined ? conf.y : 0.1) * (parent.height - height));
+        y = Qt.binding(() => Math.max((conf.y !== undefined ? conf.y : 0.1) * (parent.height - height), floorY()));
     }
 
     opacity: 0

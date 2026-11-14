@@ -55,6 +55,18 @@ The same desktop with six different wallpapers. Nothing was changed by hand: [ma
     <td><img src="docs/screenshots/01-login.png" alt="Login screen"><p align="center"><b>Login screen</b><br><sub>SDDM, synced to your wallpaper</sub></p></td>
     <td><img src="docs/screenshots/02-desktop.png" alt="Desktop widgets"><p align="center"><b>Desktop widgets</b><br><sub>clock, weather, CPU, RAM, temperature, disk</sub></p></td>
   </tr>
+  <tr>
+    <td><img src="docs/screenshots/15-overview.png" alt="Overview"><p align="center"><b>Overview</b> <kbd>Super</kbd>+<kbd>Tab</kbd><br><sub>every window by workspace; type to find one, or an app</sub></p></td>
+    <td><img src="docs/screenshots/12-shortcuts.png" alt="Keyboard shortcuts"><p align="center"><b>Keyboard shortcuts</b> <kbd>Super</kbd>+<kbd>K</kbd><br><sub>every keybind on one screen</sub></p></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/14-launcher-actions.png" alt="Launcher system actions"><p align="center"><b>System actions</b><br><sub>type "wifi", "dark", "lock", "update"… in the launcher</sub></p></td>
+    <td><img src="docs/screenshots/13-desktop-menu.png" alt="Desktop menu"><p align="center"><b>Desktop menu</b><br><sub>right-click the desktop</sub></p></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/08-lock-screen.png" alt="Lock screen"><p align="center"><b>Lock screen</b><br><sub>hyprlock, themed from your wallpaper</sub></p></td>
+    <td></td>
+  </tr>
 </table>
 
 <sub>Screenshots are taken automatically in a VMware VM by <a href="tools/vmware-test.ps1"><code>tools/vmware-test.ps1</code></a>, so they always show a clean install.</sub>
@@ -63,6 +75,7 @@ The same desktop with six different wallpapers. Nothing was changed by hand: [ma
 
 - **Wallpaper-driven theme.** Bar, panels, kitty, GTK and Qt apps, Waterfox, hyprlock and SDDM all follow the current wallpaper. Optional automatic wallpaper rotation.
 - **One shell for everything.** Bar, dock, notifications and notification center, volume/brightness popups, quick settings, launcher, dashboard, media controls, clipboard history, notes, calculator, timer, power menu, admin-password dialog and a settings app, all in Quickshell.
+- **Easy to find your way.** A window overview (<kbd>Super</kbd>+<kbd>Tab</kbd>), a shortcuts sheet (<kbd>Super</kbd>+<kbd>K</kbd>), system actions in the launcher (Wi-Fi, dark mode, lock, update…), a right-click desktop menu, and a dock that lists an app's windows when it has several.
 - **Screenshots.** Area or full screen, with an editor (satty) and text recognition (OCR).
 - **Small touches.** Night light, caffeine mode, Caps/Num Lock popups, workspace gestures, and dark GTK/Qt theming.
 - **One-command install.** It installs the packages, links the configs (your old ones are backed up), sets up the login screen, and reboots into the desktop.
@@ -105,7 +118,9 @@ See [docs/vmware-test.md](docs/vmware-test.md) for options and the manual way.
 | Keys | Action |
 |---|---|
 | <kbd>SUPER</kbd> + <kbd>Enter</kbd> | Terminal (kitty) |
-| <kbd>SUPER</kbd> + <kbd>D</kbd> | Launcher |
+| <kbd>SUPER</kbd> + <kbd>D</kbd> | Launcher (also finds system actions: type "wifi", "dark", "lock"…) |
+| <kbd>SUPER</kbd> + <kbd>Tab</kbd> or <kbd>ALT</kbd> + <kbd>Tab</kbd> | Overview of all windows |
+| <kbd>SUPER</kbd> + <kbd>K</kbd> | Keyboard shortcuts |
 | <kbd>SUPER</kbd> + <kbd>F</kbd> / <kbd>E</kbd> | Browser (Waterfox) / Files (Thunar) |
 | <kbd>SUPER</kbd> + <kbd>W</kbd> | Wallpaper picker |
 | <kbd>SUPER</kbd> + <kbd>N</kbd> / <kbd>V</kbd> | Quick Settings: Wi-Fi / sound |

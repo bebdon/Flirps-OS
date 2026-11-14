@@ -11,6 +11,7 @@ Scope {
     id: root
     property var cfg: ({})
     property bool editing: false
+    signal contextMenu(real x, real y)   // right-click on the empty desktop (shell.qml opens DesktopMenu)
 
     function w(name) { return cfg[name] || {}; }
     function setPos(name, x, y) {
@@ -43,6 +44,14 @@ Scope {
 
         Component.onCompleted: SysInfo.active = Qt.binding(() => win.visible && root.w("system").enabled === true)
 
+        // right-click anywhere the widgets don't cover (declared first, so widgets sit on top)
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            enabled: !root.editing
+            onClicked: m => root.contextMenu(m.x, m.y)
+        }
+
         // edit-mode hint
         Rectangle {
             visible: root.editing
@@ -64,6 +73,7 @@ Scope {
 
         // ---------------- widgets ----------------
         WidgetFrame {
+            id: clockFrame
             name: "clock"; desk: root
             Column {
                 id: clockCol
@@ -97,7 +107,8 @@ Scope {
         }
 
         WidgetFrame {
-            name: "weather"; desk: root; card: true
+            id: weatherFrame
+            name: "weather"; desk: root; card: true; after: clockFrame
             visible: isOn && Weather.ready
             Row {
                 spacing: 16
@@ -118,7 +129,8 @@ Scope {
         }
 
         WidgetFrame {
-            name: "system"; desk: root; card: true
+            id: systemFrame
+            name: "system"; desk: root; card: true; after: weatherFrame
             Row {
                 spacing: 6
                 Ring { value: SysInfo.cpu; text: Math.round(SysInfo.cpu * 100) + "%"; label: "CPU" }
@@ -129,7 +141,7 @@ Scope {
         }
 
         WidgetFrame {
-            name: "music"; desk: root; card: true
+            name: "music"; desk: root; card: true; after: systemFrame
             visible: isOn && (Media.active || root.editing)
             Row {
                 spacing: 14

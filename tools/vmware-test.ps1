@@ -34,6 +34,7 @@ param(
     [int]$Cpus        = 4,
     [int]$DiskGB      = 40,
     [string[]]$Wallpapers = @('anime-e8865l.jpg', 'anime-flower-girl.png', 'anime-red-tactical.png', 'ddg_1774781658663966193.jpg', 'ddg_1774734326903598045.jpg', 'ddg_1785828995460261051.jpg'),  # one 'look' screenshot each; panels use the first
+    [string]$Resolution = '1920x1080',     # screen size for the screenshot tour (one of the VM's modes)
     [switch]$NoScreenshots,
     [switch]$ScreenshotsOnly
 )
@@ -162,9 +163,20 @@ if (-not $ScreenshotsOnly) {
     Push-Location $Repo
     $ErrorActionPreference = 'Continue'
     try {
-        $commit = (git stash create) | Out-String
-        $commit = $commit.Trim()
-        if ($commit) { Write-Host 'Including your uncommitted changes.' } else { $commit = (git rev-parse HEAD).Trim() }
+        # Snapshot the working tree, new (not ignored) files included, through a throwaway
+        # copy of the index so your real staging area is left alone
+        $commit = (git rev-parse HEAD).Trim()
+        if (git status --porcelain) {
+            $tmpIndex = Join-Path $env:TEMP 'flirps-vm-test.index'
+            Copy-Item (git rev-parse --git-path index).Trim() $tmpIndex -Force
+            $env:GIT_INDEX_FILE = $tmpIndex
+            try {
+                git add -A
+                $tree = (git write-tree).Trim()
+            } finally { Remove-Item env:GIT_INDEX_FILE; Remove-Item $tmpIndex -ErrorAction SilentlyContinue }
+            $commit = (git commit-tree $tree -p HEAD -m 'VM test snapshot of the working tree').Trim()
+            Write-Host 'Including your uncommitted changes and new files.'
+        }
         $Label = (git rev-parse --short HEAD).Trim() + $(if ((git status --porcelain)) { '+changes' } else { '' })
         $Remote = (git remote get-url origin).Trim()
         $bundle = Join-Path $env:TEMP 'flirps.bundle'
@@ -257,16 +269,29 @@ if (-not $NoScreenshots) {
     Copy-Text (Join-Path $PSScriptRoot 'vm-session.sh') /tmp/vm-session.sh $script:UserAuth
     if ($ScreenshotsOnly) {
         # Bring the VM tweaks that install.sh writes up to date with this checkout
-        $m = [regex]::Match([IO.File]::ReadAllText((Join-Path $Repo 'install.sh')), "(?s)<<'LUA'\r?\n(.*?)\r?\nLUA")
-        if ($m.Success) {
+        $install = [IO.File]::ReadAllText((Join-Path $Repo 'install.sh'))
+        foreach ($f in @(@('LUA', 'machine.lua'), @('CONF', 'machine-hyprlock.conf'))) {
+            $m = [regex]::Match($install, "(?s)<<'$($f[0])'\r?\n(.*?)\r?\n$($f[0])")
+            if (-not $m.Success) { continue }
             $tmp = [IO.Path]::GetTempFileName()
             [IO.File]::WriteAllText($tmp, ($m.Groups[1].Value -replace "`r`n", "`n") + "`n")
-            try { AsUser @('CopyFileFromHostToGuest', $Vmx, $tmp, "/home/$User/.config/hypr/config/machine.lua") } finally { Remove-Item $tmp }
+            try { AsUser @('CopyFileFromHostToGuest', $Vmx, $tmp, "/home/$User/.config/hypr/config/$($f[1])") } finally { Remove-Item $tmp }
         }
+        # Copy changed and new files under dotfiles/ into the VM's clone of the repo (its configs
+        # are linked to it), so config edits show up without reinstalling. New folders aren't made.
+        Push-Location $Repo
+        $old = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+        $changed = @(git status --porcelain --untracked-files=all -- dotfiles | ForEach-Object { $_.Substring(3) } | Where-Object { Test-Path (Join-Path $Repo $_) -PathType Leaf })
+        $ErrorActionPreference = $old
+        Pop-Location
+        foreach ($p in $changed) { Copy-Text (Join-Path $Repo $p) "/home/$User/flirps-os/$p" $script:UserAuth }
+        if ($changed.Count) { Write-Host "Copied $($changed.Count) changed config file(s) into the VM." }
     }
     # A neutral weather location, so screenshots don't show where the VM's internet connection is
     Run ('printf ''{"name": "Reykjavik", "lat": 64.15, "lon": -21.94, "tz": "Atlantic/Reykjavik", "unit": "celsius"}\n'' > ~/.config/quickshell/panels/location.json; ' +
          'rm -f ~/.cache/quickshell/weather.json') | Out-Null
+    # A fixed screen size, so screenshots don't depend on how big the VMware window is
+    Run ("sed -i 's/mode = `"[^`"]*`"/mode = `"$Resolution@60`"/' ~/.config/hypr/config/monitors.lua") | Out-Null
     AsUser @('runProgramInGuest', $Vmx, '/usr/bin/sudo', '/usr/local/bin/flirps-showcase', 'login')
     $ready = Join-Path $env:TEMP 'flirps-ready'
     $end = (Get-Date).AddSeconds(90)
@@ -294,6 +319,15 @@ if (-not $NoScreenshots) {
     Run 'qs-panel quicksettings'; Start-Sleep 3;  Shot '06-quick-settings.png'
     Run 'qs-panel wallpapers';    Start-Sleep 15; Shot '07-wallpapers.png'
     Run 'qs-panel power';         Start-Sleep 3;  Shot '10-power-menu.png'
+    Run 'qs -c panels ipc call cheatsheet toggle';      Start-Sleep 3; Shot '12-shortcuts.png'
+    Run 'qs -c panels ipc call desktopmenu open 700 330'; Start-Sleep 3; Shot '13-desktop-menu.png'
+    Run 'qs -c panels ipc call launcher query wifi';    Start-Sleep 3; Shot '14-launcher-actions.png'
+    # a few windows for the overview
+    Run 'qs -c panels ipc call launcher close; setsid -f kitty --hold fastfetch >/dev/null 2>&1; setsid -f thunar >/dev/null 2>&1; setsid -f kitty >/dev/null 2>&1'
+    Start-Sleep 10
+    Run 'qs -c panels ipc call overview toggle';        Start-Sleep 4; Shot '15-overview.png'
+    Run 'qs -c panels ipc call overview close; pkill -x kitty; pkill -x thunar'
+    Start-Sleep 2
 
     # One look per wallpaper: the desktop with Quick Settings open, both recolored
     $n = 0
@@ -305,6 +339,12 @@ if (-not $NoScreenshots) {
         Start-Sleep 3
         Shot ('look-{0}.png' -f $n)
     }
+
+    # The lock screen, last: it can't be unlocked from here (the logout below ends it)
+    Run "qs -c panels ipc call quicksettings close; wallpaper set ~/Pictures/Wallpapers/$($Wallpapers[0])"
+    Start-Sleep 8
+    Run 'setsid -f hyprlock >/tmp/hyprlock.log 2>&1'
+    Start-Sleep 8;  Shot '08-lock-screen.png'
 
     Save-Diagnostics
 

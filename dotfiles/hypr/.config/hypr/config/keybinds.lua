@@ -60,6 +60,9 @@ hl.bind(mainMod .. " + N", hl.dsp.exec_cmd("~/.local/bin/qs-panel quicksettings 
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("~/.local/bin/qs-panel quicksettings audio"))
 hl.bind(mainMod .. " + H", hl.dsp.exec_cmd("~/.local/bin/settings"))
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd("qs -c panels ipc call bar toggle"))
+hl.bind(mainMod .. " + K", hl.dsp.exec_cmd("qs -c panels ipc call cheatsheet toggle"))   -- shortcuts list (panels/Cheatsheet.qml: keep it in step with this file)
+hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("qs -c panels ipc call overview toggle"))
+hl.bind("ALT + TAB", hl.dsp.exec_cmd("qs -c panels ipc call overview toggle"))
 
 for i = 1, 10 do
   local key = tostring(i % 10)

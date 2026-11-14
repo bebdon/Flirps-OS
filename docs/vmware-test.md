@@ -29,8 +29,9 @@ The VM is left at the login screen; log in as `flirps` to look around.
 | `-Timezone`, `-Keymap`, `-Locale` | e.g. `Europe/London`, `uk`, `en_GB.UTF-8` (defaults: UTC, us, en_US) |
 | `-MemoryMB`, `-Cpus`, `-DiskGB` | VM size for a new VM (8192, 4, 40) |
 | `-Wallpapers a.jpg,b.jpg,...` | Wallpapers for the tour, one "look" screenshot each (file names in `wallpapers/`) |
+| `-Resolution 1920x1080` | Screen size for the screenshots, so they don't depend on the VMware window (default 1920x1080) |
 | `-NoScreenshots` | Install only |
-| `-ScreenshotsOnly` | Only redo the screenshots on the existing VM (also refreshes the VM tweaks from `install.sh`) |
+| `-ScreenshotsOnly` | Only redo the screenshots on the existing VM. It first copies your changed files under `dotfiles/` into the VM and refreshes the VM tweaks from `install.sh`, so config edits show up without a reinstall |
 
 Run it again any time: it reinstalls from scratch on the same VM, so every run tests a clean install.
 
@@ -88,6 +89,7 @@ The installer notices it's inside a VM and handles that for you:
 - installs VMware's guest tools, so the screen resizes with the window
 - makes apps draw in software: Hyprland can't use the GPU buffers VMware's virtual graphics give apps, so without this the bar, kitty and hyprlock never appear
 - uses a software cursor, since the hardware one is invisible in VMs
+- has the lock screen grab its blurred-screenshot background into normal memory, since Hyprland rejects the GPU buffer it would otherwise use (and hyprlock crashes)
 - turns blur down and shadows off, so it stays smooth
 
 It reboots on its own when it finishes (press any key during the countdown to stay put).
@@ -105,8 +107,6 @@ It reboots on its own when it finishes (press any key during the countdown to st
 Write down anything that's broken, missing or ugly. Those are the installer bugs.
 
 **Expected in a VM and not bugs:** no Bluetooth, no brightness control, less blur than on real hardware, and slower animations (apps draw in software).
-
-**Known VM issue:** the lock screen (hyprlock) crashes in VMware, because its blurred-screenshot background uses a GPU buffer Hyprland rejects there. Hyprland then shows a red "lock screen died" screen; switch to another TTY and back, or reboot the VM. Real hardware isn't affected.
 
 ### If Hyprland shows a black screen or won't start
 
