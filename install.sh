@@ -24,8 +24,19 @@ pkgs() { grep -vE '^\s*(#|$)' "$1"; }
 [ "$EUID" -ne 0 ]        || die "Run as your normal user, not root (sudo is used when needed)."
 command -v sudo >/dev/null || die "sudo is required."
 
+# Running inside a virtual machine? (vmware, oracle, kvm, ... or "none")
+VIRT="$(systemd-detect-virt 2>/dev/null || true)"
+[ -n "$VIRT" ] || VIRT=none
+if [ "$VIRT" != none ]; then
+    say "Virtual machine detected ($VIRT): adding VM tweaks"
+    [ -n "$SCALE" ] || SCALE=1
+fi
+
 say "Installing packages"
 sudo pacman -Syu --needed --noconfirm $(pkgs "$REPO/packages/pacman.txt")
+if [ "$VIRT" = vmware ]; then
+    sudo pacman -S --needed --noconfirm open-vm-tools   # resizing the window, shared folders
+fi
 
 if [ "$AUR" = 1 ]; then
     if ! command -v paru >/dev/null; then
@@ -93,6 +104,19 @@ if [ -n "$SCALE" ] || [ ! -f "$MON" ]; then
     sed "s|@SCALE@|$SCALE|" "$REPO/templates/monitors.lua" > "$MON"
 fi
 sed "s|@HOME@|$HOME|"   "$REPO/templates/qt6ct.conf"   > "$HOME/.config/qt6ct/qt6ct.conf"
+MACHINE="$HOME/.config/hypr/config/machine.lua"
+if [ "$VIRT" != none ]; then
+    # VM graphics can't draw a hardware cursor and struggle with heavy blur.
+    cat > "$MACHINE" <<'LUA'
+-- written by install.sh because this is a virtual machine
+hl.config({
+  cursor = { no_hardware_cursors = true },
+  decoration = { blur = { passes = 1 }, shadow = { enabled = false } },
+})
+LUA
+else
+    rm -f "$MACHINE"
+fi
 
 xdg-user-dirs-update
 # Wallpapers live in the repo; link the folder so new ones land in the repo too
@@ -114,11 +138,14 @@ fi
 
 say "Enabling services"
 sudo systemctl enable NetworkManager.service bluetooth.service power-profiles-daemon.service
+if [ "$VIRT" = vmware ]; then
+    sudo systemctl enable vmtoolsd.service vmware-vmblock-fuse.service
+fi
 
 say "Done!"
 cat <<MSG
 Next steps:
-  1. Put some wallpapers in ~/Pictures/Wallpapers
-  2. Reboot (or log out and pick Hyprland)
-  3. Pick a wallpaper and the whole theme recolors to match it
+  1. Reboot (or log out and pick Hyprland)
+  2. Pick a wallpaper (SUPER+W or the settings app) and the theme recolors to match
+  3. Add your own wallpapers to ~/Pictures/Wallpapers (it's the repo's wallpapers/ folder)
 MSG

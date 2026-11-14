@@ -14,7 +14,7 @@ cd ~/flirps-os
 ./install.sh
 ```
 
-Reboot, put some images in `~/Pictures/Wallpapers`, and pick one.
+Reboot and pick a wallpaper (SUPER+W).
 
 | Option | What it does |
 |---|---|
@@ -23,6 +23,8 @@ Reboot, put some images in `~/Pictures/Wallpapers`, and pick one.
 | `--no-sddm` | Don't set up the SDDM login screen |
 
 Existing configs that would be overwritten are moved to `~/.flirps-backup/<date>/` first.
+
+To try it in a virtual machine first, see [docs/vmware-test.md](docs/vmware-test.md).
 
 ## What's inside
 

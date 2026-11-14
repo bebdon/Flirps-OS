@@ -9,3 +9,4 @@ __pycache__/
 # generated per machine by install.sh (from templates/)
 dotfiles/hypr/.config/hypr/config/monitors.lua
 dotfiles/qt6ct/.config/qt6ct/qt6ct.conf
+dotfiles/hypr/.config/hypr/config/machine.lua
