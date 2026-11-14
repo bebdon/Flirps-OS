@@ -145,7 +145,7 @@ packages/           pacman.txt and aur.txt
 dotfiles/           GNU Stow packages, linked into $HOME
 templates/          per-machine files the installer generates (monitor scale, qt6ct path)
 system/             SDDM login theme and config, copied into /usr/share and /etc
-wallpapers/         the wallpaper collection (~/Pictures/Wallpapers links here)
+wallpapers/         six starter wallpapers (~/Pictures/Wallpapers links here; ones you add stay out of git)
 tools/              the automated VMware test and screenshot tour
 docs/               guides and screenshots
 ```

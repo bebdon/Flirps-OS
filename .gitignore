@@ -10,3 +10,11 @@ __pycache__/
 dotfiles/hypr/.config/hypr/config/monitors.lua
 dotfiles/qt6ct/.config/qt6ct/qt6ct.conf
 dotfiles/hypr/.config/hypr/config/machine.lua
+# wallpapers: only these six are shared; any others you add stay on your machine
+wallpapers/*
+!wallpapers/anime-e8865l.jpg
+!wallpapers/anime-flower-girl.png
+!wallpapers/anime-red-tactical.png
+!wallpapers/ddg_1774734326903598045.jpg
+!wallpapers/ddg_1774781658663966193.jpg
+!wallpapers/ddg_1785828995460261051.jpg
